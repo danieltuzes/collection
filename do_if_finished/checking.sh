@@ -1,7 +1,7 @@
 #!/bin/bash
 # ellenőrizgeti a feltételt, aztán ha már nem teljesül, akkor végrehajta a maradékot
 
-printf "Leszámolom, hány $pattern mintájú folyamat van, és ha 0, lefuttatom a szkriptet.\n"
+printf "Leszámolom, hány $pattern reguláris kifejezésű folyamat van, és ha nem több, mint $processcount, lefuttatom a szkriptet és levelet küldök.\n"
 
 do_count() {
 echo `ps -u tuzes | grep "$pattern" | wc -l`
