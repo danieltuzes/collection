@@ -14,6 +14,6 @@ read -s -p "Írd be a eltecomputeservers@gmail.com jelszavát: " eltecomputeserv
 export eltecomputeserverspassword
 echo ""
 
-nohup ./${mypath}/send_mail.sh "Értesítés beállítva a $(hostname) gépen" "Értesítés fog érkezni, mihelyst a szkript odajut, hogy e-mailt küldjön a $(hostname) gépen." &>> ${mypath}/send_mail.nohup &
+nohup ${mypath}/send_mail.sh "Értesítés beállítva a $(hostname) gépen" "Értesítés fog érkezni, mihelyst a szkript odajut, hogy e-mailt küldjön a $(hostname) gépen." &>> ${mypath}/send_mail.nohup &
 
-nohup ./${mypath}/checking.sh &>> ${mypath}/do_if_finished.nohup &	# addig fut, amíg van folyamat, de le van választva a terminálról
+nohup ${mypath}/checking.sh &>> ${mypath}/do_if_finished.nohup &	# addig fut, amíg van folyamat, de le van választva a terminálról

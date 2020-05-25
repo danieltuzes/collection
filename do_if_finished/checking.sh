@@ -21,4 +21,4 @@ printf "%s, elindítottam mindet 10 másodperce, nézd csak, kapsz egy kis infó
 pstext=`ps -u tuzes`	# beleíródik a kimeneti fileba
 printf "${pstext}\n"
 
-nohup ./${mypath}/send_mail.sh "$(hostname) sikeresen lefutott" "Nincs több $pattern mintájú program a $(hostname) gépen.\n${pstext}" &>> ${mypath}/send_mail.nohup &
+nohup ${mypath}/send_mail.sh "$(hostname) sikeresen lefutott" "Nincs több $pattern mintájú program a $(hostname) gépen.\n${pstext}" &>> ${mypath}/send_mail.nohup &
