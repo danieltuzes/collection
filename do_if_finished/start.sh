@@ -13,12 +13,12 @@ export processcount
 mypath=`dirname $0`	# kelleni fog a mappa helye, ahonnan fut
 export mypath
 
-read -s -p "Írd be a eltecomputeservers@gmail.com jelszavát: " eltecomputeserverspassword	# bekéri a jelszót, és nem írja ki a terminálra
+read -s -p "Írd be a(z) eltecomputeservers@gmail.com jelszavát: " eltecomputeserverspassword	# bekéri a jelszót, és nem írja ki a terminálra
 export eltecomputeserverspassword
 echo ""
 
 nohup ${mypath}/send_mail.sh "Értesítés beállítva a $(hostname) gépen" \
-"Értesítés fog érkezni, ha a $(hostname) gépen a $pattern reguláris kifejezésű folyamatok száma $processcount alá csökken, és végrehajtja a $command parancsot." \
+"Értesítés fog érkezni, ha a(z) $(hostname) gépen a $pattern reguláris kifejezésű folyamatok száma $processcount alá csökken, és végrehajtja az alábbi parancsot:\n$command" \
 &>> ${mypath}/send_mail.nohup &
 
 nohup ${mypath}/checking.sh &>> ${mypath}/do_if_finished.nohup &	# addig fut, amíg van folyamat, de le van választva a terminálról

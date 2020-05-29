@@ -1,7 +1,8 @@
 #!/bin/bash
 # ellenőrizgeti a feltételt, aztán ha már nem teljesül, akkor végrehajta a maradékot
 
-printf "Leszámolom, hány $pattern reguláris kifejezésű folyamat van, és ha nem több, mint $processcount, lefuttatom a szkriptet és levelet küldök.\n"
+echo "Leszámolom, hány $pattern reguláris kifejezésű folyamat van, és ha nem több, mint $processcount, levelet küldök és végrehajtom az alábbi parancsot:"
+echo "$command"
 
 do_count() {
 echo `ps -u tuzes | grep "$pattern" | wc -l`
@@ -10,15 +11,19 @@ echo `ps -u tuzes | grep "$pattern" | wc -l`
 for ((count=$(do_count); $count > $processcount; count=$(do_count)))
 do
 	now=`date`
-	printf "%s, count: %d\n" "$now" $count
+	echo "$now, count: $count"
 	sleep 10
 done
 
 now=`date`	# ha már lefutottak a programok
+echo "$now, count: %count <= $processcount."
+echo "Elindítom az alábbi parancsot:"
+echo "$command"
+
 (eval $command)	# elindítja a 2D4 nevű megállított progikat
 sleep 10	# vár, hogy biztosan elinduljanak
-printf "%s, elindítottam az alábbi parancsot 10 másodperce:\n%s\nTovábbi infó a folyamatokról:\n" "$now" "$command"
+echo "sleep 10; ps -u tuzes"	# kiírja, hogy mi a frászt csinál
 pstext=`ps -u tuzes`	# beleíródik a kimeneti fileba
-printf "${pstext}\n"
+echo "$pstext"
 
-nohup ${mypath}/send_mail.sh "$(hostname) sikeresen lefutott" "A $(hostname) gépen a $pattern reguláris kifejezésű folyamatok száma $processcount alá csökkent, és végrehajtódott a $command parancs.\nps -u tuzes\n${pstext}" &>> ${mypath}/send_mail.nohup &
+nohup ${mypath}/send_mail.sh "$(hostname) sikeresen lefutott" "A $(hostname) gépen a $pattern reguláris kifejezésű folyamatok száma $processcount alá csökkent, és végrehajtódott az alábbi parancs:\n$command\n\nTovábbi infót ad: ps -u tuzes\n${pstext}" &>> ${mypath}/send_mail.nohup &
