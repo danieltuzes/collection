@@ -12,7 +12,7 @@ Ennek a dokumentumnak a készítésekor az alábbiak voltak a fájlok tartalmai?
 ### `start.sh`
 ```bash
 #!/bin/bash
-# végrehajt egy parancsot és e-mail küld, hogyha lejártak az adott minátjú programok, ehhez pedig bekér egy e-mail account jelszót
+# végrehajt egy parancsot és e-mail küld, hogyha elfogynak az adott minátjú programok, ehhez pedig bekér egy e-mail account jelszót
 
 pattern="BiSiSeX.*"	# milyen reguláris kifejezést keressen?
 export pattern
@@ -20,16 +20,21 @@ export pattern
 command="killall -s CONT -r '2D4'"	# a parancs, amit végrehajt
 export command
 
+processcount=0	# hánynál több kell, hogy fusson, hogy ne számítson befejezettnek
+export processcount
+
 mypath=`dirname $0`	# kelleni fog a mappa helye, ahonnan fut
 export mypath
 
-read -s -p "Írd be a eltecomputeservers@gmail.com jelszavát: " eltecomputeserverspassword
+read -s -p "Írd be az eltecomputeservers@gmail.com jelszavát: " eltecomputeserverspassword	# bekéri a jelszót, és nem írja ki a terminálra
 export eltecomputeserverspassword
 echo ""
 
-nohup ./${mypath}/send_mail.sh 'Értesítés beállítva' 'Értesítés fog érkezni, mihelyst a szkript odajut, hogy e-mailt küldjön.' &>> ${mypath}/send_mail.nohup &
+nohup ${mypath}/send_mail.sh "Értesítés beállítva a(z) $(hostname) gépen" \
+"Értesítés fog érkezni, ha a(z) $(hostname) gépen a $pattern reguláris kifejezésű folyamatok száma $processcount alá csökken, és végrehajtja az alábbi parancsot:\n$command" \
+&>> ${mypath}/send_mail.nohup &
 
-nohup ./${mypath}/checking.sh &>> ${mypath}/do_if_finished.nohup &	# addig fut, amíg van folyamat, de le van választva a terminálról
+nohup ${mypath}/checking.sh &>> ${mypath}/do_if_finished.nohup &	# addig fut, amíg van folyamat, de le van választva a terminálról
 ```
 
 ### `checking.sh`
@@ -37,27 +42,32 @@ nohup ./${mypath}/checking.sh &>> ${mypath}/do_if_finished.nohup &	# addig fut, 
 #!/bin/bash
 # ellenőrizgeti a feltételt, aztán ha már nem teljesül, akkor végrehajta a maradékot
 
-printf "Leszámolom, hány $pattern mintájú folyamat van, és ha 0, lefuttatom a szkriptet.\n"
+echo "Leszámolom, hány $pattern reguláris kifejezésű folyamat van, és ha nem több, mint $processcount, levelet küldök és végrehajtom az alábbi parancsot:"
+echo "$command"
 
 do_count() {
 echo `ps -u tuzes | grep "$pattern" | wc -l`
 }
 
-for ((count=$(do_count); $count > 0; count=$(do_count)))
+for ((count=$(do_count); $count > $processcount; count=$(do_count)))
 do
 	now=`date`
-	printf "%s, count: %d\n" "$now" $count
+	echo "$now, count: $count"
 	sleep 10
 done
 
 now=`date`	# ha már lefutottak a programok
-eval $command	# elindítja a 2D4 nevű megállított progikat
-sleep 10	# vár, hogy biztosan elinduljanak
-printf "%s, elindítottam mindet 10 másodperce, nézd csak, kapsz egy kis infót\n" "$now"
-pstext=`ps -u tuzes`	# beleíródik a kimeneti fileba
-printf "${pstext}\n"
+echo "$now, count: %count <= $processcount."
+echo "Elindítom az alábbi parancsot:"
+echo "$command"
 
-nohup ./${mypath}/send_mail.sh 't2 sikeresen lefutott' "Nincs több $pattern mintájú program.\n${pstext}" &>> ${mypath}/send_mail.nohup &
+(eval $command)	# elindítja a 2D4 nevű megállított progikat
+sleep 10	# vár, hogy biztosan elinduljanak
+echo "sleep 10; ps -u tuzes"	# kiírja, hogy mi a frászt csinál
+pstext=`ps -u tuzes`	# beleíródik a kimeneti fileba
+echo "$pstext"
+
+nohup ${mypath}/send_mail.sh "$(hostname) sikeresen lefutott" "A $(hostname) gépen a $pattern reguláris kifejezésű folyamatok száma $processcount alá csökkent, és végrehajtódott az alábbi parancs:\n$command\n\nTovábbi infót ad: ps -u tuzes\n${pstext}" &>> ${mypath}/send_mail.nohup &
 ```
 
 ### `send_mail.sh`
@@ -65,7 +75,9 @@ nohup ./${mypath}/send_mail.sh 't2 sikeresen lefutott' "Nincs több $pattern min
 #!/bin/bash
 
 emailFname="email_for_curl.txt"	# a hülye curl csak fájlt tud küldeni, szöveget nem, így bele kell írni egy fájlba a tartalmat
-echo "Content-Type: text/plain; charset=utf-8
+
+# létrehozza a fájlt, a `-e` kapcsoló pedig értelmezi a kiterjesztett karaktereket (újsor, tabulátor,s stb)
+echo -e "Content-Type: text/plain; charset=utf-8
 From: eltecomputeservers@gmail.com
 To: tuzes@metal.elte.hu
 Subject: $1
@@ -73,11 +85,12 @@ Subject: $1
 $2
 " > ${mypath}/${emailFname}	# a fájl így létrejön, de majd törölni kell
 
+# elküldi a levelet
 curl --url 'smtps://smtp.gmail.com:465' --ssl-reqd \
   --mail-from 'eltecomputeservers@gmail.com' \
   --mail-rcpt 'tuzes@metal.elte.hu' \
   --user eltecomputeservers@gmail.com:${eltecomputeserverspassword} \
   -T ${mypath}/${emailFname}
-  
+
 rm ${mypath}/${emailFname}	# a curl elküldte a fájlt, most már lehet törölni
 ```
