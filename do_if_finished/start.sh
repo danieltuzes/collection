@@ -13,7 +13,6 @@ export processcount
 mypath=`dirname $0`	# kelleni fog a mappa helye, ahonnan fut
 export mypath
 
-read -s -p "Írd be a(z) eltecomputeservers@gmail.com jelszavát: " eltecomputeserverspassword	# bekéri a jelszót, és nem írja ki a terminálra
 read -s -p "Írd be az eltecomputeservers@gmail.com jelszavát: " eltecomputeserverspassword	# bekéri a jelszót, és nem írja ki a terminálra
 export eltecomputeserverspassword
 echo ""
