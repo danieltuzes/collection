@@ -26,4 +26,4 @@ echo "sleep 10; ps -u tuzes"	# kiírja, hogy mi a frászt csinál
 pstext=`ps -u tuzes`	# beleíródik a kimeneti fileba
 echo "$pstext"
 
-nohup ${mypath}/send_mail.sh "$(hostname) sikeresen lefutott" "A $(hostname) gépen a $pattern reguláris kifejezésű folyamatok száma $processcount alá csökkent, és végrehajtódott az alábbi parancs:\n$command\n\nTovábbi infót ad: ps -u tuzes\n${pstext}" &>> ${mypath}/send_mail.nohup &
+nohup ${mypath}/send_mail.sh "$(hostname) sikeresen lefutott" "A $(hostname) gépen a $pattern reguláris kifejezésű folyamatok száma elérte a $processcount értéke, és végrehajtódott az alábbi parancs:\n$command\n\nTovábbi infót ad: ps -u tuzes\n${pstext}" &>> ${mypath}/send_mail.nohup &
