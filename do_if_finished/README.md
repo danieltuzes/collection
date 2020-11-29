@@ -57,7 +57,7 @@ do
 done
 
 now=`date`	# ha már lefutottak a programok
-echo "$now, count: %count <= $processcount."
+echo "$now, count: $count <= $processcount."
 echo "Elindítom az alábbi parancsot:"
 echo "$command"
 
@@ -67,7 +67,7 @@ echo "sleep 10; ps -u tuzes"	# kiírja, hogy mi a frászt csinál
 pstext=`ps -u tuzes`	# beleíródik a kimeneti fileba
 echo "$pstext"
 
-nohup ${mypath}/send_mail.sh "$(hostname) sikeresen lefutott" "A $(hostname) gépen a $pattern reguláris kifejezésű folyamatok száma $processcount alá csökkent, és végrehajtódott az alábbi parancs:\n$command\n\nTovábbi infót ad: ps -u tuzes\n${pstext}" &>> ${mypath}/send_mail.nohup &
+nohup ${mypath}/send_mail.sh "$(hostname) sikeresen lefutott" "A $(hostname) gépen a $pattern reguláris kifejezésű folyamatok száma <= $processcount, és végrehajtódott az alábbi parancs:\n$command\n\nTovábbi infót ad: ps -u tuzes\n${pstext}" &>> ${mypath}/send_mail.nohup &
 ```
 
 ### `send_mail.sh`

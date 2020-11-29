@@ -26,7 +26,25 @@
 *.a
 *.lib
 
+# Debugging and linker files
+*.pdb
+*.idb
+*.ilk
+*.iobj
+*.ipdb
+
+# log files in Release and Debug folders
+**/Release/*.log
+**/Debug/*.log
+**/Release/*.tlog
+**/Debug/*.tlog
+*FileListAbsolute*
+*recipe*
+
 # Executables
 *.exe
 *.out
 *.app
+
+# Hidden folders
+.*
