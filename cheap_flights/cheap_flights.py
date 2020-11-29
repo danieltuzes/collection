@@ -6,13 +6,14 @@ import json
 import requests
 import datetime
 import os.path
+import codecs
 import time
 import smtplib, ssl
 from multiprocessing import Pool
 from getpass import getpass
-import smtplib, ssl
+from itertools import product
 
-def check_price(flight_date_query):
+def check_price(flight_date_query, apikey):
     """
         It returns the price for a given date using skyscanners API. If there is an error, it tries it again, for 3 times. If there is no offer, it returns NA.
 
@@ -29,7 +30,7 @@ def check_price(flight_date_query):
     for i in range(3):
         url_wo_date = "https://skyscanner-skyscanner-flight-search-v1.p.rapidapi.com/apiservices/browsequotes/v1.0/HU/EUR/hu/BUD-sky/DUB-sky/"
         headers = {
-        'x-rapidapi-key': "34f96b7f2dmsh9deeb4335229e7bp16bc0cjsnf843e4da5c96",
+        'x-rapidapi-key': apikey,
         'x-rapidapi-host': "skyscanner-skyscanner-flight-search-v1.p.rapidapi.com"
         }
 
@@ -55,6 +56,7 @@ def check_price(flight_date_query):
     return "Error"
 
 if __name__ == '__main__':
+    
     """
         This part is needed for the multiprocessing module.
     """
@@ -64,11 +66,14 @@ if __name__ == '__main__':
     days = 30   # how many days should be checked
 
     port = 465  # For SSL
-    emailpass = getpass()
+    emailpass = getpass("Enter password for e-mail: ")
     sender_email = "eltecomputeservers@gmail.com"
     receiver_email = "tuzesdaniel@gmail.com"
     subject = "Subject: new flight price\n\n"
 
+    apikey = []
+    # this way starmap can be fed with (date,key) pairs
+    apikey.append(input("Enter rapidapi key: "))
     # endregion settings
 
     flight_dates = [flight_date]
@@ -81,15 +86,15 @@ if __name__ == '__main__':
     # Run this with a pool of 5 agents having a chunksize of 3 until finished
     nof_processes = min(days,50)
 
-    ofile=open("flight_prices.dat","a")
-    price_header = "# flight date\tflight price\toffer date\told flight price [€]\n"
+    ofile = codecs.open("flight_prices.dat","a","utf-8")
+    price_header = "# flight date\tflight price\toffer date\told flight price [€]"
     print(price_header, file=ofile, flush=True)
     
     while os.path.exists("delete_to_stop.md"):
 
         # get prices parallel
         with Pool(processes=nof_processes) as pool:
-            result = pool.map(check_price, flight_dates, int(days/nof_processes))
+            result = pool.starmap(check_price, product(flight_dates,apikey), int(days/nof_processes))
         
         # if there will be new prices, a mail will be sent, and this mail's body is messagebody
         messagebody = price_header
@@ -98,7 +103,7 @@ if __name__ == '__main__':
             if flight_prices[i] != result[i]:
                 entry = flight_dates[i].isoformat() + "\t" + str(result[i]) + "\t" + str(datetime.datetime.now()) + "\t" + str(flight_prices[i])
                 print(entry, file=ofile)
-                messagebody += entry + "\n"
+                messagebody += "\n" + entry
                 flight_prices[i] = result[i]
         
         ofile.flush()

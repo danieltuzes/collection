@@ -48,3 +48,9 @@
 
 # Hidden folders
 .*
+
+# sensitive data
+*apikey.txt
+
+# general data
+*.dat
