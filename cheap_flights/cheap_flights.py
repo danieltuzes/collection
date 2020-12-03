@@ -16,8 +16,8 @@ import requests
 
 
 def check_price(flight_date_query, apikey):
-    """
-        It returns the price for a given date using skyscanners API. If there is an error, it tries it again, for 3 times. If there is no offer, it returns NA.
+    """Returns the price for a given date using skyscanners API.
+    If there is an error, it tries it again, for 3 times. If there is no offer, it returns NA.
 
         Parameters
         -----------
@@ -27,9 +27,11 @@ def check_price(flight_date_query, apikey):
         Return
         -----------
         float or string
-            The price of the cheapest flight, if there is any. If no direct flight is found, returns "NA". In case there is an error with the API, returns "Error".
+            The price of the cheapest flight, if there is any.
+            If no direct flight is found, returns "NA".
+            In case there is an error with the API, returns "Error".
     """
-    for i in range(3):
+    for _ in range(3):
         url_wo_date = "https://skyscanner-skyscanner-flight-search-v1.p.rapidapi.com/apiservices/browsequotes/v1.0/HU/EUR/hu/BUD-sky/DUB-sky/"
         headers = {
             'x-rapidapi-key': apikey,
@@ -42,13 +44,9 @@ def check_price(flight_date_query, apikey):
 
         if "Quotes" in interpreted:
             if interpreted["Quotes"]:
-                minPrice = interpreted["Quotes"][0]["MinPrice"]
-                return minPrice
-
-            else:
-                return "NA"
-        else:
-            pass  # unsuccessful request
+                min_price = interpreted["Quotes"][0]["MinPrice"]
+                return min_price
+            return "NA"
 
         time.sleep(1)
 
@@ -108,13 +106,13 @@ if __name__ == '__main__':
                 entry = flight_dates[i].isoformat() + "\t" + str(result[i]) + "\t" + str(
                     datetime.datetime.now()) + "\t" + str(flight_prices[i])
                 print(entry, file=ofile)
-                messagebody += "\n" + entry
+                MESSAGE_BODY += "\n" + entry
                 flight_prices[i] = result[i]
 
         ofile.flush()
-        if messagebody != PRICE_HEADER:  # send an email
+        if MESSAGE_BODY != PRICE_HEADER:  # send an email
             context = ssl.create_default_context()
-            message = SUBJECT + messagebody
+            message = SUBJECT + MESSAGE_BODY
             with smtplib.SMTP_SSL("smtp.gmail.com", PORT, context=context) as server:
                 server.login(SENDER_EMAIL, emailpass)
                 server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL,
