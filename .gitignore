@@ -54,3 +54,6 @@
 
 # general data
 *.dat
+
+# buitka-compiled folders
+*.build
