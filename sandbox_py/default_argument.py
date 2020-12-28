@@ -16,8 +16,8 @@ print(non_mutable_f(1), non_mutable_f(1), non_mutable_f(1))
 # No, b doesn't change
 
 
-def mutable_f_arg(param_a, m_list=[]):
-    """m_list is mutable, that's dangerous! m_list should be none instead"""
+def mutable_f_arg(param_a, m_list=[]):  # pylint: disable = W0102
+    """m_list is mutable, that's dangerous! m_list should be None instead"""
     m_list.append(param_a)
     return m_list
 

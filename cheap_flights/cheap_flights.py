@@ -17,7 +17,8 @@ import requests
 
 def check_price(flight_date_query, apikey):
     """Returns the price for a given date using skyscanners API.
-    If there is an error, it tries it again, for 3 times. If there is no offer, it returns NA.
+    If there is an error, it tries it again, for 3 times.
+    If there is no offer, it returns NA.
 
         Parameters
         -----------
@@ -57,10 +58,6 @@ def check_price(flight_date_query, apikey):
 
 
 if __name__ == '__main__':
-
-    """
-        This part is needed for the multiprocessing module.
-    """
 
     # region settings
     flight_date = datetime.date(2021, 1, 3)   # starting point of the flights
