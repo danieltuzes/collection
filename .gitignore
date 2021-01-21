@@ -55,5 +55,13 @@
 # general data
 *.dat
 
-# buitka-compiled folders
+# python cache
+**/__pycache__
+# nuitka-compiled folders
 *.build
+
+# ignore bootstrap and jquery scripts
+**/*bootstrap*.css
+**/*bootstrap*.map
+**/*bootstrap*.js
+**/jquery*.js

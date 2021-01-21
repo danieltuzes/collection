@@ -1,0 +1,166 @@
+<!-- This file belongs to file_upload.py, a mini project for a html-based file upload service. -->
+<!doctype html>
+
+<head>
+    <title>Flask demo by Daniel T</title>
+    <script type="text/javascript" src="{{ url_for('static',filename='scripts/jquery-3.5.1.js') }}"></script>
+    <link href="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/css/bootstrap.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/js/bootstrap.bundle.js') }}"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        #anchor-icon {
+            display: inline;
+            /* background:url("anchor.jpg"); */
+            /* background-repeat: no-repeat; */
+        }
+
+        a.heading-link {
+            opacity: 0;
+            margin-left: 10px;
+            text-decoration: none;
+        }
+
+        h1:hover a.heading-link {
+            opacity: 1;
+        }
+
+        h2:hover a.heading-link {
+            opacity: 1;
+        }
+
+        h3:hover a.heading-link {
+            opacity: 1;
+        }
+
+        h4:hover a.heading-link {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Flask demo</h1>
+        <p>Hi, this is simple html file hosted by flask to demonstrate a basic concept of Flask. It will serve 2
+            html template pages
+        <ul>
+            <li><a href="/">This index file</a> is the welcome page,</li>
+            <li>And the <a href="listfile"> page</a> is the other possibility, where you can upload and list files.
+                At the end of this page, you can also upload files and list them.</li>
+        </ul>
+        <p>To view this page properly, you need to host it with flask, because this file contains only template values
+            for the css and JS files which cannot be picked up if this file is opened as a regular file. By hosting this
+            as a flask template, flask will replace the Jinja code with the proper values.
+        <ol>
+            <li>Add <code>file_upload.py</code> to the <code>FLASK_APP</code> environment.<ul>
+                    <li>If you are on powershell, enter <code>$env:FLASK_APP = "file_upload.py"</code> to the terminal.
+                    </li>
+                    <li>cd into the folder where you have the file <code>file_upload.py</code>.</li>
+                    <li>Run flask from a conda environment where you have it installed. To do this, issue
+                        <code>flask run</code>.
+                    </li>
+                </ul>
+            </li>
+        </ol>
+        </p>
+        <h2>Dependencies</h2>
+        This page also uses bootstrap to facilitate styling and to use some basic JS modules.
+        Bootstrap and jQuery both can be downloaded and served from the host computer, so there
+        is no need to include them from a remote server. So you can download both of them:
+        <ul>
+            <li><a href="https://getbootstrap.com/docs/4.6/">Bootstrap</a></li>
+            <li><a href="https://jquery.com/download/">jQuery</a></li>
+        </ul>
+        <h2>Bootstrap</h2>
+        Bootstrap has css files for styling and js for interactive contents. I show you 2 examples for bootstrap.
+        The rest can be found at <a href="https://getbootstrap.com/docs/4.6/">Bootstrap's docs</a>.
+        <h3>Tables</h3>
+        You can easily improve the visual appearance of a table, and get a result similar to latex's result.
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">First</th>
+                    <th scope="col">Last</th>
+                    <th scope="col">Handle</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td>Mark</td>
+                    <td>Otto</td>
+                    <td>@mdo</td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>Jacob</td>
+                    <td>Thornton</td>
+                    <td>@fat</td>
+                </tr>
+                <tr>
+                    <th scope="row">3</th>
+                    <td>Larry</td>
+                    <td>the Bird</td>
+                    <td>@twitter</td>
+                </tr>
+            </tbody>
+        </table>
+        Without Bootstrap, it would look different.
+        <h3>Dismissing a box</h3>
+        This requires JS, I believe.
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Holy guacamole!</strong> You should check in on some of those fields below.
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        Click on the x to remove this box.
+        </p>
+        <h2>jQuery</h2>
+        <p>This is a simple JS file you can download from the website of <a
+                href="https://jquery.com/download/">jQuery</a>. jQuery is not only necessary for some bootstrap
+            functions, it is also needed to create the automatic header ID names and links.</p>
+        <p>
+            To explore this latter feature, move your mouse over a header section and a # symbol will appear with a
+            link. The link points to the very same section header, and the header section will have an ID so that when
+            you enter the link of the # into the url, the browser will jump to the desired place. You can also bookmark
+            a page with a scrolled state due to this feature.
+        </p>
+        <h3>Tooltip</h3>
+        <p>Tooltip is appearing textbox on top of an object. Its purpose is to show extra info per request. Below is
+            shown a simple sentence and moving your mouse over the objects will reveal their color.</p>
+        <p>My <span data-toggle="tooltip" data-placement="top" title="brown">wallet</span> was in my <span
+                data-toggle="tooltip" data-placement="bottom" title="green">jacket</span>.</p>
+        <h2>Upload files</h2>
+        <form method="POST" action="" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="ddd">Browse for a single file on your computer</label>
+                <input type="file" name="file" id="ddd" class="form-control-file">
+                <input type="submit" value="Submit" class="form-control-file">
+            </div>
+        </form>
+        <h2>List files</h2>
+        List of files in the <code>uploads</code> directory:
+        <ul>
+            {% for file in files %}
+            <li>{{ file }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+        $(document).ready(function () {
+            $("h1,h2,h3,h4").each(function (i) {
+                var heading = $(this);
+                var headingId = heading.text().trim().toLowerCase().replace(/\s/g, '_')
+                heading.attr("id", headingId);
+                heading.append("<a class='heading-link' href='#" + headingId + "'><div id='anchor-icon'>&#160;&#35;</div></a>");
+            });
+        })
+    </script>
+</body>
+
+</html>

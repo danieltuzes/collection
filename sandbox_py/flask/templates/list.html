@@ -1,0 +1,92 @@
+<!-- This file belongs to file_upload.py, a mini project for a html-based file upload service. -->
+<!doctype html>
+
+<head>
+    <title>Flask demo by Daniel T</title>
+    <script type="text/javascript" src="{{ url_for('static',filename='scripts/jquery-3.5.1.js') }}"></script>
+    <link href="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/css/bootstrap.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/js/bootstrap.bundle.js') }}"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        #anchor-icon {
+            display: inline;
+            /* background:url("anchor.jpg"); */
+            /* background-repeat: no-repeat; */
+        }
+
+        a.heading-link {
+            opacity: 0;
+            margin-left: 10px;
+            text-decoration: none;
+        }
+
+        h1:hover a.heading-link {
+            opacity: 1;
+        }
+
+        h2:hover a.heading-link {
+            opacity: 1;
+        }
+
+        h3:hover a.heading-link {
+            opacity: 1;
+        }
+
+        h4:hover a.heading-link {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Flask file list and upload</h1>
+        {% if success is defined %}
+        {% if success %}
+        <div class="alert alert-success" role="alert">
+            You have successfully uploaded the file {{ new_filename }}
+        </div>
+        {% else %}
+        <div class="alert alert-danger" role="alert">
+            File upload was unsuccessful, because (python says): <code>{{ reason }}</code>
+        </div>
+        {% endif %}
+        {% endif %}
+        <h2>List of files</h2>
+        List of files in the <code>uploads</code> directory:
+        <ul>
+            {% for file in files %}
+            <li>{{ file }}{% if file == new_filename %} <span class="badge badge-success">New</span>{% endif %}</li>
+            {% endfor %}
+        </ul>
+        <h2>Upload files</h2>
+        {% if prevent_upload is defined and prevent_upload %}
+        <div class="alert alert-danger" role="alert">
+            Can't upload files, because the folder is full.
+        </div>
+        {% else %}
+        <form method="POST" action="/submit" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="content">Browse for a single file on your computer</label>
+                <input type="file" name="file" id="content" class="form-control-file">
+                <input type="submit" value="Submit" class="form-control-file">
+            </div>
+        </form>
+        {% endif %}
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+        $(document).ready(function () {
+            $("h1,h2,h3,h4").each(function (i) {
+                var heading = $(this);
+                var headingId = heading.text().trim().toLowerCase().replace(/\s/g, '_')
+                heading.attr("id", headingId);
+                heading.append("<a class='heading-link' href='#" + headingId + "'><div id='anchor-icon'>&#160;&#35;</div></a>");
+            });
+        })
+    </script>
+</body>
+
+</html>
