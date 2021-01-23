@@ -1,12 +1,22 @@
 """file_upload.py
-    A simple file upload and file listing Flask application."""
+    A simple file upload and file listing Flask application.
+
+    To run this on flask webserver,
+    - set up an environmental variable FLASK_APP to file_upload.py
+    - cd into the folder where this file is
+    - issue ``flask run``"""
 
 import os
 from pathlib import Path
+from time import sleep
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
-from time import sleep
+
+MAX_CONTENT_LENGTH = 1 * 1024 * 1024  # 1 MB, largest file to upload
+FOLDER_SIZE_LIMIT = 850 * 1024  # 850 KB, size of directory
+FILE_COUNT_LIMIT = 5  # maximum number of files
+IGNORE_FILES = {"README.md"}  # the files that should not be listed
 
 
 def get_size(folder_to_check):
@@ -15,10 +25,43 @@ def get_size(folder_to_check):
     return sum(f.stat().st_size for f in root_directory.glob('**/*') if f.is_file())
 
 
+def get_list_of_files():
+    """Counts the files in the upload directory except the files that should be ignored."""
+    files = os.listdir(app.config['UPLOAD_PATH'])
+
+    for ignore_file in IGNORE_FILES:
+        if ignore_file in files:
+            files.remove(ignore_file)
+
+    return files
+
+
+def too_much_storage_is_used():
+    """Tells if the upload directory uses too much disk space."""
+    used_storage = get_size(app.config['UPLOAD_PATH'])
+    if used_storage > FOLDER_SIZE_LIMIT:
+        return True
+
+    return False
+
+
+def too_many_files():
+    """Tells if too many files are in the upload directory."""
+    file_list = get_list_of_files()
+    if len(file_list) > FILE_COUNT_LIMIT:
+        return True
+
+    return False
+
+
+def upload_disallowed():
+    """Returns false is for some security or performance reason the upload should be blocked."""
+    return too_much_storage_is_used() or too_many_files()
+
+
 app = Flask(__name__)
 app.config['UPLOAD_PATH'] = 'uploads'
-app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024
-FOLDER_SIZE_LIMIT = 850 * 1024  # 850 KB
+app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 
 @app.route('/')
@@ -41,47 +84,47 @@ def upload_file():
 @app.route('/listfile')
 def listfiles():
     """Returns the ``list.html`` file."""
-    files = os.listdir(app.config['UPLOAD_PATH'])
-    prevent_upload = False
+    files = get_list_of_files()
 
-    used_storage = get_size(app.config['UPLOAD_PATH'])
-    if used_storage > FOLDER_SIZE_LIMIT:
-        prevent_upload = True
-
-    return render_template('list.html', files=files, prevent_upload=prevent_upload)
+    return render_template('list.html', files=files, prevent_upload=upload_disallowed())
 
 
-@app.route('/submit', methods=['POST'])
+@app.route('/submit')
+def submit_empty():
+    """If somebody passes the submit as a link, don't die"""
+    return redirect(url_for('listfiles'))
+
+
+@app.route('/submit', methods=['GET', 'POST'])
 def submit():
-    """Saves the updloaded file and sends confirmation."""
-    files = os.listdir(app.config['UPLOAD_PATH'])
+    """Saves the uploaded file and sends confirmation."""
     prevent_upload = False
     success = False
     reason = ""
-    filename = ""
+    new_filename = ""
 
-    used_storage = get_size(app.config['UPLOAD_PATH'])
-    if used_storage > FOLDER_SIZE_LIMIT:
+    if upload_disallowed():
         success = False
         prevent_upload = True
         reason = "The folder is full, flask didn't even try to save the file here."
     else:
         try:
             uploaded_file = request.files['file']
-            filename = secure_filename(uploaded_file.filename)
+            new_filename = secure_filename(uploaded_file.filename)
+            new_path = os.path.join(app.config['UPLOAD_PATH'], new_filename)
             if uploaded_file.filename != '':
-                uploaded_file.save(os.path.join(
-                    app.config['UPLOAD_PATH'], filename))
-                success = True
-                sleep(0.1)
-                files = os.listdir(app.config['UPLOAD_PATH'])
-        except RequestEntityTooLarge:
+                if os.path.exists(new_path):
+                    success = False
+                    reason = "File already exists with the file name " + new_filename
+                else:
+                    uploaded_file.save(new_path)
+                    success = True
+                    sleep(0.1)
+                    prevent_upload = upload_disallowed()
+
+        except RequestEntityTooLarge as my_exception:
+            print("Exception", my_exception)
             success = False
-            reason = "File was too large."
-
-    used_storage = get_size(app.config['UPLOAD_PATH'])
-    if used_storage > FOLDER_SIZE_LIMIT:
-        prevent_upload = True
-
-    return render_template('list.html', files=files, prevent_upload=prevent_upload,
-                           success=success, new_filename=filename, reason=reason)
+            reason = str(my_exception)
+    return render_template('list.html', files=get_list_of_files(), prevent_upload=prevent_upload,
+                           new_filename=new_filename, success=success, reason=reason)
