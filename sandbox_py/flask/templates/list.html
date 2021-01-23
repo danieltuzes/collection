@@ -56,7 +56,11 @@
         List of files in the <code>uploads</code> directory:
         <ul>
             {% for file in files %}
-            <li>{{ file }}{% if file == new_filename %} <span class="badge badge-success">New</span>{% endif %}</li>
+            <li>{{ file }}
+                {% if file == new_filename and success %} <span class="badge badge-success">New</span>
+                {% endif %}{% if file == new_filename and not success %}
+                <span class="badge badge-warning">already exists</span>{% endif %}
+            </li>
             {% endfor %}
         </ul>
         <h2>Upload files</h2>
@@ -66,27 +70,19 @@
         </div>
         {% else %}
         <form method="POST" action="/submit" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="content">Browse for a single file on your computer</label>
-                <input type="file" name="file" id="content" class="form-control-file">
-                <input type="submit" value="Submit" class="form-control-file">
+            <div class="input-group mb-3">
+                <div class="custom-file">
+                    <input type="file" name="file" class="custom-file-input" id="customFile">
+                    <label class="custom-file-label" for="customFile">Choose file</label>
+                </div>
+                <div class="input-group-append">
+                    <input type="submit" value="Submit" class="btn btn-primary">
+                </div>
             </div>
         </form>
         {% endif %}
     </div>
-    <script type="text/javascript">
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip()
-        })
-        $(document).ready(function () {
-            $("h1,h2,h3,h4").each(function (i) {
-                var heading = $(this);
-                var headingId = heading.text().trim().toLowerCase().replace(/\s/g, '_')
-                heading.attr("id", headingId);
-                heading.append("<a class='heading-link' href='#" + headingId + "'><div id='anchor-icon'>&#160;&#35;</div></a>");
-            });
-        })
-    </script>
+    <script type="text/javascript" src="{{ url_for('static',filename='scripts/end_of_file_script.js') }}"></script>
 </body>
 
 </html>

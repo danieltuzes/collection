@@ -148,19 +148,8 @@
             {% endfor %}
         </ul>
     </div>
-    <script type="text/javascript">
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip()
-        })
-        $(document).ready(function () {
-            $("h1,h2,h3,h4").each(function (i) {
-                var heading = $(this);
-                var headingId = heading.text().trim().toLowerCase().replace(/\s/g, '_')
-                heading.attr("id", headingId);
-                heading.append("<a class='heading-link' href='#" + headingId + "'><div id='anchor-icon'>&#160;&#35;</div></a>");
-            });
-        })
-    </script>
+    <script type="text/javascript" src="{{ url_for('static',filename='scripts/end_of_file_script.js') }}"></script>
+
 </body>
 
 </html>
