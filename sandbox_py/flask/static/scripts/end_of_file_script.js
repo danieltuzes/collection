@@ -10,9 +10,13 @@ $(document).ready(function () {
     });
     var url = window.location.href
     var id_in_url = url.substring(url.lastIndexOf('#') + 1);
-    if (id_in_url) {
+    if (id_in_url != null) {
         document.getElementById(id_in_url).scrollIntoView({
             behavior: 'smooth'
         });
     }
 })
+$(".custom-file-input").on("change", function () {
+    var fileName = $(this).val().split("\\").pop();
+    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+});
