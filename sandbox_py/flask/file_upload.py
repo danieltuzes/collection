@@ -29,7 +29,7 @@ def get_size(folder_to_check):
 
 def get_list_of_files():
     """Counts the files in the upload directory except the files that should be ignored."""
-    files = os.listdir(app.config['UPLOAD_PATH'])
+    files = os.listdir(app.config['UPLOAD_PATH']).sort()
 
     for ignore_file in IGNORE_FILES:
         if ignore_file in files:
