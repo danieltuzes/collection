@@ -70,9 +70,9 @@
                     <span class="badge badge-success">New</span>
                     {% endif %}{% if file[0] == new_filename and not success %}
                     <span class="badge badge-warning">already exists</span>
-                    {% endif %}</a>
-                <button class="btn btn-outline-secondary" style="width: 8em" disabled>
-                    {{ file[1] }} KB</button>
+                    {% endif %}
+                    <span class="text-secondary" style="width: 8em; display: inline-block">
+                        {{ file[1] }} KB</span></a>
                 <a href="delfile?del={{ file[0] }}" type="button" class="btn btn-danger">del</a>
             </div><br>
             {% endfor %}
