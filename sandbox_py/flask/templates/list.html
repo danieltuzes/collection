@@ -42,6 +42,11 @@
 <body>
     <div class="container">
         <h1>Flask file list and upload</h1>
+        {% if deleted is defined %}
+        <div class="alert alert-success" role="alert">
+            You have successfully deleted the file {{ deleted }}
+        </div>
+        {% endif %}
         {% if success is defined %}
         {% if success %}
         <div class="alert alert-success" role="alert">
@@ -54,16 +59,25 @@
         {% endif %}
         {% endif %}
         <h2>List of files</h2>
-        List of files in the <code>uploads</code> directory:
-        <ul>
+        <p>List of files in the <code>uploads</code> directory:</p>
+        <div class="text-right">
             {% for file in files %}
-            <li>{{ file }}
-                {% if file == new_filename and success %} <span class="badge badge-success">New</span>
-                {% endif %}{% if file == new_filename and not success %}
-                <span class="badge badge-warning">already exists</span>{% endif %}
-            </li>
+            <div class="btn-group my-1" role="group" data-toggle="tooltip" data-placement="top"
+                title="uploaded: {{ file[2] }}">
+                <a href="download/{{ file[0] }}" class="btn btn-outline-primary" type="button">
+                    {{ file[0] }}
+                    {% if file[0] == new_filename and success %}
+                    <span class="badge badge-success">New</span>
+                    {% endif %}{% if file[0] == new_filename and not success %}
+                    <span class="badge badge-warning">already exists</span>
+                    {% endif %}</a>
+                <button class="btn btn-outline-secondary" style="width: 8em" disabled>
+                    {{ file[1] }} KB</button>
+                <a href="delfile?del={{ file[0] }}" type="button" class="btn btn-danger">del</a>
+            </div><br>
             {% endfor %}
-        </ul>
+        </div>
+
         <h2>Upload files</h2>
         {% if prevent_upload is defined and prevent_upload %}
         <div class="alert alert-danger" role="alert">

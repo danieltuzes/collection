@@ -7,9 +7,11 @@
     - issue ``flask run``"""
 
 import os
+import math
+import datetime
 from pathlib import Path
 from time import sleep
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 
@@ -32,6 +34,22 @@ def get_list_of_files():
     for ignore_file in IGNORE_FILES:
         if ignore_file in files:
             files.remove(ignore_file)
+
+    return files
+
+
+def get_files():
+    """Gets the list of files with some properties."""
+    filenames = get_list_of_files()
+    file_sizes = []
+    file_ctimes = []    # creation date
+    for file in filenames:
+        properties = os.stat(app.config['UPLOAD_PATH'] + "/" + file)
+        file_sizes.append(math.ceil(properties.st_size/1024))
+        file_ctimes.append(datetime.datetime.fromtimestamp(
+            properties.st_ctime).strftime('%Y-%m-%d-%H:%M'))
+
+    files = list(zip(filenames, file_sizes, file_ctimes))
 
     return files
 
@@ -84,9 +102,29 @@ def upload_file():
 @app.route('/listfile')
 def listfiles():
     """Returns the ``list.html`` file."""
-    files = get_list_of_files()
+    return render_template('list.html', files=get_files(), prevent_upload=upload_disallowed())
 
-    return render_template('list.html', files=files, prevent_upload=upload_disallowed())
+
+@app.route('/delfile', methods=['GET'])
+def delfile():
+    """Returns confirm deletion."""
+    file_to_delete = request.args.get('del')
+    file_infos = get_files()
+    file_names = [file[0] for file in file_infos]
+    if file_to_delete is not None and file_to_delete in file_names:
+        if request.args.get('confirmed') is None:
+            return render_template('del_confirmation.html', file=file_to_delete)
+        else:
+            if file_to_delete in file_names:
+                os.remove(app.config['UPLOAD_PATH'] + "/" + file_to_delete)
+
+    return render_template('list.html', files=get_files(), prevent_upload=upload_disallowed(), deleted=file_to_delete)
+
+
+@app.route('/download/<path:filename>')
+def download(filename):
+    filename = secure_filename(filename)
+    return send_from_directory(directory=app.config['UPLOAD_PATH'], filename=filename, as_attachment=True)
 
 
 @app.route('/submit')
@@ -126,5 +164,5 @@ def submit():
             print("Exception", my_exception)
             success = False
             reason = str(my_exception)
-    return render_template('list.html', files=get_list_of_files(), prevent_upload=prevent_upload,
+    return render_template('list.html', files=get_files(), prevent_upload=prevent_upload,
                            new_filename=new_filename, success=success, reason=reason)

@@ -1,0 +1,26 @@
+<!-- This file belongs to file_upload.py, a mini project for a html-based file upload service. -->
+<!doctype html>
+
+<head>
+    <title>Flask demo by Daniel T</title>
+    <script type="text/javascript" src="{{ url_for('static',filename='scripts/jquery-3.5.1.js') }}"></script>
+    <link href="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/css/bootstrap.css') }}" rel="stylesheet">
+    <script type="text/javascript"
+        src="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/js/bootstrap.bundle.js') }}"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div class="alert alert-danger" role="alert">
+            You are about to delete the file<br />
+            <a class="btn btn-danger float-right" href="delfile?del={{ file }}&confirmed" role="button">Yes, delete
+                it!</a>
+            <strong>{{ file }}</strong><br />
+            Are you sure?<br />
+
+        </div>
+    </div>
+</body>
+
+</html>
