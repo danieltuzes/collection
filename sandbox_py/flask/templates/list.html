@@ -71,12 +71,43 @@
                     {% endif %}{% if file[0] == new_filename and not success %}
                     <span class="badge badge-warning">already exists</span>
                     {% endif %}
-                    <span class="text-secondary" style="width: 8em; display: inline-block">
-                        {{ file[1] }} KB</span></a>
+                    <span class="text-secondary" style="width: 8em; display: inline-block; text-align: right;">
+                        {{ file[1] }} KB </span></a>
                 <a href="delfile?del={{ file[0] }}" type="button" class="btn btn-danger">del</a>
             </div><br>
             {% endfor %}
         </div>
+        <h3>Upload limits</h3>
+        For performance reasons, limits on the uploads are introduced. The limits can be increased per request. The
+        limits and the occupied resources are shown here.
+        <ul>
+            <li>There is a file size limit of {{ (limit['file_size']/1024/1024)|int }} MB. This will be checked during
+                the upload.</li>
+
+            <li>A folder size limit:
+                <div class="progress position-relative" style="height: 2em;">
+                    <div class="progress-bar" role="progressbar"
+                        style="width: {{ ((100*folder_size)/limit['folder_size'])|int }}%;">
+                    </div>
+                    <span class="justify-content-center d-flex position-absolute w-100 align-middle"
+                        style="bottom: 1em">
+                        {{ (folder_size/1024/1024)|int }} MB out of {{ ((limit['folder_size'])/1024/1024)|int }}
+                        MB</span>
+                </div>
+            </li>
+            <li>and a file count limit:
+                <div class="progress position-relative" style="height: 2em;">
+                    <div class="progress-bar" role="progressbar"
+                        style="width: {{ ((100*(files|length))/limit['file_count'])|int }}%;">
+                    </div> <span class="justify-content-center d-flex position-absolute w-100 align-middle"
+                        style="bottom: 1em">{{ files|length }}
+                        out of {{ limit['file_count'] }}</span>
+                </div>
+            </li>
+        </ul>
+
+
+
 
         <h2>Upload files</h2>
         {% if prevent_upload is defined and prevent_upload %}

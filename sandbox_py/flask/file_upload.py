@@ -16,8 +16,10 @@ from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 
 MAX_CONTENT_LENGTH = 1 * 1024 * 1024  # 1 MB, largest file to upload
-FOLDER_SIZE_LIMIT = 850 * 1024  # 850 KB, size of directory
+FOLDER_SIZE_LIMIT = 5 * 1024 * 1024  # 850 KB, size of directory
 FILE_COUNT_LIMIT = 5  # maximum number of files
+LIMITS = {"file_size": MAX_CONTENT_LENGTH,
+          "folder_size": FOLDER_SIZE_LIMIT, "file_count": FILE_COUNT_LIMIT}
 IGNORE_FILES = {"README.md"}  # the files that should not be listed
 
 
@@ -29,7 +31,8 @@ def get_size(folder_to_check):
 
 def get_list_of_files():
     """Counts the files in the upload directory except the files that should be ignored."""
-    files = os.listdir(app.config['UPLOAD_PATH']).sort()
+    files = os.listdir(app.config['UPLOAD_PATH'])
+    files.sort()
 
     for ignore_file in IGNORE_FILES:
         if ignore_file in files:
@@ -66,7 +69,7 @@ def too_much_storage_is_used():
 def too_many_files():
     """Tells if too many files are in the upload directory."""
     file_list = get_list_of_files()
-    if len(file_list) > FILE_COUNT_LIMIT:
+    if len(file_list) >= FILE_COUNT_LIMIT:
         return True
 
     return False
@@ -102,7 +105,8 @@ def upload_file():
 @app.route('/listfile')
 def listfiles():
     """Returns the ``list.html`` file."""
-    return render_template('list.html', files=get_files(), prevent_upload=upload_disallowed())
+    folder_size = get_size(app.config['UPLOAD_PATH'])
+    return render_template('list.html', files=get_files(), prevent_upload=upload_disallowed(), folder_size=folder_size, limit=LIMITS)
 
 
 @app.route('/delfile', methods=['GET'])
@@ -118,7 +122,8 @@ def delfile():
             if file_to_delete in file_names:
                 os.remove(app.config['UPLOAD_PATH'] + "/" + file_to_delete)
 
-    return render_template('list.html', files=get_files(), prevent_upload=upload_disallowed(), deleted=file_to_delete)
+    folder_size = get_size(app.config['UPLOAD_PATH'])
+    return render_template('list.html', files=get_files(), prevent_upload=upload_disallowed(), folder_size=folder_size, deleted=file_to_delete, limit=LIMITS)
 
 
 @app.route('/download/<path:filename>')
@@ -164,5 +169,7 @@ def submit():
             print("Exception", my_exception)
             success = False
             reason = str(my_exception)
+
+    folder_size = get_size(app.config['UPLOAD_PATH'])
     return render_template('list.html', files=get_files(), prevent_upload=prevent_upload,
-                           new_filename=new_filename, success=success, reason=reason)
+                           new_filename=new_filename, success=success, reason=reason, limit=LIMITS, folder_size=folder_size)
