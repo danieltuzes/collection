@@ -1,6 +1,7 @@
 $(function () {
     $('[data-toggle="tooltip"]').tooltip()
-})
+}) // initiate tooltip
+
 $(document).ready(function () {
     $("h1,h2,h3,h4").each(function (i) {
         var heading = $(this);
@@ -10,13 +11,14 @@ $(document).ready(function () {
     });
     var url = window.location.href
     var id_in_url = url.substring(url.lastIndexOf('#') + 1);
-    if (id_in_url != null) {
+    if (document.getElementById(id_in_url) != null) {
         document.getElementById(id_in_url).scrollIntoView({
             behavior: 'smooth'
         });
     }
-})
+}) // add links and anchors to heading sections
+
 $(".custom-file-input").on("change", function () {
     var fileName = $(this).val().split("\\").pop();
     $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-});
+}) // fancy upload button
