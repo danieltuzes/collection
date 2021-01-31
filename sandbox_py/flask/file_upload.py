@@ -21,6 +21,7 @@ FILE_COUNT_LIMIT = 5  # maximum number of files
 LIMITS = {"file_size": MAX_CONTENT_LENGTH,
           "folder_size": FOLDER_SIZE_LIMIT, "file_count": FILE_COUNT_LIMIT}
 IGNORE_FILES = {"README.md"}  # the files that should not be listed
+LOG_FNAME = "flask_events.log"  # file logs: uploads and deletes
 
 
 def get_size(folder_to_check):
@@ -121,6 +122,9 @@ def delfile():
         else:
             if file_to_delete in file_names:
                 os.remove(app.config['UPLOAD_PATH'] + "/" + file_to_delete)
+                with open(LOG_FNAME, "a") as o_file:
+                    print(datetime.datetime.now().strftime('%Y-%m-%d-%H:%M'),
+                          request.remote_addr, file_to_delete, "File deleted.", sep="\t", file=o_file)
 
     folder_size = get_size(app.config['UPLOAD_PATH'])
     return render_template('list.html', files=get_files(), prevent_upload=upload_disallowed(), folder_size=folder_size, deleted=file_to_delete, limit=LIMITS)
@@ -150,6 +154,9 @@ def submit():
         success = False
         prevent_upload = True
         reason = "The folder is full, flask didn't even try to save the file here."
+        with open(LOG_FNAME) as o_file:
+            print(datetime.datetime().now().strftime('%Y-%m-%d-%H:%M'),
+                  request.remote_addr, "", "File cannot be created, because the folder is full.", sep="\t", file=o_file)
     else:
         try:
             uploaded_file = request.files['file']
@@ -159,9 +166,16 @@ def submit():
                 if os.path.exists(new_path):
                     success = False
                     reason = "File already exists with the file name " + new_filename
+                    with open(LOG_FNAME, "a") as o_file:
+                        print(datetime.datetime.now().strftime('%Y-%m-%d-%H:%M'),
+                              request.remote_addr,
+                              new_filename, "File cannot be saved: file name already exists.", sep="\t", file=o_file)
                 else:
                     uploaded_file.save(new_path)
                     success = True
+                    with open(LOG_FNAME, "a") as o_file:
+                        print(datetime.datetime.now().strftime('%Y-%m-%d-%H:%M'),
+                              request.remote_addr, new_filename, "File saved.", sep="\t", file=o_file)
                     sleep(0.1)
                     prevent_upload = upload_disallowed()
 
