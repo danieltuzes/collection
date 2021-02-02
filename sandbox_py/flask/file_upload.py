@@ -84,9 +84,9 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 @app.route('/')
 def index():
-    """Returns the ``index.html`` file."""
+    """Returns the ``index.j2`` file."""
     files = os.listdir(app.config['UPLOAD_PATH'])
-    return render_template('index.html', files=files)
+    return render_template('index.j2', files=files)
 
 
 @app.route('/', methods=['POST'])
@@ -101,9 +101,9 @@ def upload_file():
 
 @app.route('/listfile')
 def listfiles():
-    """Returns the ``list.html`` file."""
+    """Returns the ``list.j2`` file."""
     folder_size = get_size(app.config['UPLOAD_PATH'])
-    return render_template('list.html', files=get_files(), prevent_upload=upload_disallowed(), folder_size=folder_size, limit=LIMITS)
+    return render_template('list.j2', files=get_files(), prevent_upload=upload_disallowed(), folder_size=folder_size, limit=LIMITS)
 
 
 @app.route('/delfile', methods=['GET'])
@@ -114,7 +114,7 @@ def delfile():
     file_names = [file[0] for file in file_infos]
     if file_to_delete is not None and file_to_delete in file_names:
         if request.args.get('confirmed') is None:
-            return render_template('del_confirmation.html', file=file_to_delete)
+            return render_template('del_confirmation.j2', file=file_to_delete)
         else:
             if file_to_delete in file_names:
                 os.remove(app.config['UPLOAD_PATH'] + "/" + file_to_delete)
@@ -123,7 +123,7 @@ def delfile():
                           request.remote_addr, file_to_delete, "File deleted.", sep="\t", file=o_file)
 
     folder_size = get_size(app.config['UPLOAD_PATH'])
-    return render_template('list.html', files=get_files(), prevent_upload=upload_disallowed(), folder_size=folder_size, deleted=file_to_delete, limit=LIMITS)
+    return render_template('list.j2', files=get_files(), prevent_upload=upload_disallowed(), folder_size=folder_size, deleted=file_to_delete, limit=LIMITS)
 
 
 @app.route('/download/<path:filename>')
@@ -181,5 +181,5 @@ def submit():
             reason = str(my_exception)
 
     folder_size = get_size(app.config['UPLOAD_PATH'])
-    return render_template('list.html', files=get_files(), prevent_upload=prevent_upload,
+    return render_template('list.j2', files=get_files(), prevent_upload=prevent_upload,
                            new_filename=new_filename, success=success, reason=reason, limit=LIMITS, folder_size=folder_size)
