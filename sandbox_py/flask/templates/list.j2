@@ -58,26 +58,8 @@
         </div>
         {% endif %}
         {% endif %}
-        <h2>List of files</h2>
-        <p>List of files in the <code>uploads</code> directory:</p>
-        <div class="text-right">
-            {% for file in files %}
-            <div class="btn-group my-1" role="group" data-toggle="tooltip" data-placement="top"
-                title="uploaded: {{ file[2] }}">
-                <a href="download/{{ file[0] }}" class="btn btn-outline-primary" type="button">
-                    {{ file[0] }}
-                    {% if file[0] == new_filename and success %}
-                    <span class="badge badge-success">New</span>
-                    {% endif %}{% if file[0] == new_filename and not success %}
-                    <span class="badge badge-warning">already exists</span>
-                    {% endif %}
-                    <span class="text-secondary" style="width: 8em; display: inline-block; text-align: right;">
-                        {{ file[1] }} KB </span></a>
-                <a href="delfile?del={{ file[0] }}" type="button" class="btn btn-danger">del</a>
-            </div><br>
-            {% endfor %}
-        </div>
-        <h3>Upload limits</h3>
+        
+        <h2>Upload limits</h2>
         For performance reasons, limits on the uploads are introduced. The limits can be increased per request. The
         limits and the occupied resources are shown here.
         <ul>
@@ -106,9 +88,6 @@
             </li>
         </ul>
 
-
-
-
         <h2>Upload files</h2>
         {% if prevent_upload is defined and prevent_upload %}
         <div class="alert alert-danger" role="alert">
@@ -127,6 +106,26 @@
             </div>
         </form>
         {% endif %}
+
+        <h2>List of files</h2>
+        <p>List of files in the <code>uploads</code> directory:</p>
+        <div class="text-right">
+            {% for file in files %}
+            <div class="btn-group my-1" role="group" data-toggle="tooltip" data-placement="top"
+                title="uploaded: {{ file[2] }}">
+                <a href="download/{{ file[0] }}" class="btn btn-outline-primary" type="button">
+                    {{ file[0] }}
+                    {% if file[0] == new_filename and success %}
+                    <span class="badge badge-success">New</span>
+                    {% endif %}{% if file[0] == new_filename and not success %}
+                    <span class="badge badge-warning">already exists</span>
+                    {% endif %}
+                    <span class="text-secondary" style="width: 8em; display: inline-block; text-align: right;">
+                        {{ file[1] }} KB </span></a>
+                <a href="delfile?del={{ file[0] }}" type="button" class="btn btn-danger">del</a>
+            </div><br>
+            {% endfor %}
+        </div>
     </div>
     <script type="text/javascript" src="{{ url_for('static',filename='scripts/end_of_file_script.js') }}"></script>
 </body>
