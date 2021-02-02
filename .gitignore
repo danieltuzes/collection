@@ -65,3 +65,6 @@
 **/*bootstrap*.map
 **/*bootstrap*.js
 **/jquery*.js
+
+# settings
+settings.py

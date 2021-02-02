@@ -14,14 +14,10 @@ from time import sleep
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
+from settings import *  # user defined settings go here
 
-MAX_CONTENT_LENGTH = 1 * 1024 * 1024  # 1 MB, largest file to upload
-FOLDER_SIZE_LIMIT = 5 * 1024 * 1024  # 850 KB, size of directory
-FILE_COUNT_LIMIT = 5  # maximum number of files
 LIMITS = {"file_size": MAX_CONTENT_LENGTH,
           "folder_size": FOLDER_SIZE_LIMIT, "file_count": FILE_COUNT_LIMIT}
-IGNORE_FILES = {"README.md"}  # the files that should not be listed
-LOG_FNAME = "flask_events.log"  # file logs: uploads and deletes
 
 
 def get_size(folder_to_check):
