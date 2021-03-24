@@ -66,9 +66,10 @@
 **/*bootstrap*.js
 **/jquery*.js
 
-# ignore flask uploaded files and log file
+# ignore flask uploaded files, log file and generated files
 sandbox_py/flask/uploads/*
 sandbox_py/flask/*.log
+sandbox_py/flask/static/plots/*.png
 
 # settings
 settings.py

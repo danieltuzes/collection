@@ -3,6 +3,8 @@
 
     To run this on flask webserver,
     - set up an environmental variable FLASK_APP to file_upload.py
+        - in PowerShell, execute $env:FLASK_APP = "file_upload.py"
+        - in CMD, set FLASK_APP=file_upload.py
     - cd into the folder where this file is
     - issue ``flask run``"""
 
@@ -11,10 +13,16 @@ import math
 import datetime
 from pathlib import Path
 from time import sleep
+from datetime import datetime
+import matplotlib.pyplot
+import numpy
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
-from settings import *  # user defined settings go here
+
+
+# user defined settings go here
+from settings import *  # pylint: disable=wildcard-import
 
 LIMITS = {"file_size": MAX_CONTENT_LENGTH,
           "folder_size": FOLDER_SIZE_LIMIT, "file_count": FILE_COUNT_LIMIT}
@@ -120,16 +128,26 @@ def delfile():
                 os.remove(app.config['UPLOAD_PATH'] + "/" + file_to_delete)
                 with open(LOG_FNAME, "a") as o_file:
                     print(datetime.datetime.now().strftime('%Y-%m-%d-%H:%M'),
-                          request.remote_addr, file_to_delete, "File deleted.", sep="\t", file=o_file)
+                          request.remote_addr, file_to_delete, "File deleted.",
+                          sep="\t", file=o_file)
 
     folder_size = get_size(app.config['UPLOAD_PATH'])
-    return render_template('list.j2', files=get_files(), prevent_upload=upload_disallowed(), folder_size=folder_size, deleted=file_to_delete, limit=LIMITS)
+    return render_template('list.j2',
+                           files=get_files(),
+                           prevent_upload=upload_disallowed(),
+                           folder_size=folder_size,
+                           deleted=file_to_delete,
+                           limit=LIMITS)
 
 
 @app.route('/download/<path:filename>')
 def download(filename):
+    """Sends the file to the browser as downloadable content.
+        Doesn't show it, even it could be rendered."""
     filename = secure_filename(filename)
-    return send_from_directory(directory=app.config['UPLOAD_PATH'], filename=filename, as_attachment=True)
+    return send_from_directory(directory=app.config['UPLOAD_PATH'],
+                               filename=filename,
+                               as_attachment=True)
 
 
 @app.route('/submit')
@@ -152,7 +170,8 @@ def submit():
         reason = "The folder is full, flask didn't even try to save the file here."
         with open(LOG_FNAME) as o_file:
             print(datetime.datetime().now().strftime('%Y-%m-%d-%H:%M'),
-                  request.remote_addr, "", "File cannot be created, because the folder is full.", sep="\t", file=o_file)
+                  request.remote_addr, "",
+                  "File cannot be created, because the folder is full.", sep="\t", file=o_file)
     else:
         try:
             uploaded_file = request.files['file']
@@ -165,13 +184,16 @@ def submit():
                     with open(LOG_FNAME, "a") as o_file:
                         print(datetime.datetime.now().strftime('%Y-%m-%d-%H:%M'),
                               request.remote_addr,
-                              new_filename, "File cannot be saved: file name already exists.", sep="\t", file=o_file)
+                              new_filename,
+                              "File cannot be saved: file name already exists.",
+                              sep="\t", file=o_file)
                 else:
                     uploaded_file.save(new_path)
                     success = True
                     with open(LOG_FNAME, "a") as o_file:
                         print(datetime.datetime.now().strftime('%Y-%m-%d-%H:%M'),
-                              request.remote_addr, new_filename, "File saved.", sep="\t", file=o_file)
+                              request.remote_addr, new_filename, "File saved.",
+                              sep="\t", file=o_file)
                     sleep(0.1)
                     prevent_upload = upload_disallowed()
 
@@ -181,5 +203,61 @@ def submit():
             reason = str(my_exception)
 
     folder_size = get_size(app.config['UPLOAD_PATH'])
-    return render_template('list.j2', files=get_files(), prevent_upload=prevent_upload,
-                           new_filename=new_filename, success=success, reason=reason, limit=LIMITS, folder_size=folder_size)
+    return render_template('list.j2',
+                           files=get_files(),
+                           prevent_upload=prevent_upload,
+                           new_filename=new_filename,
+                           success=success,
+                           reason=reason,
+                           limit=LIMITS,
+                           folder_size=folder_size)
+
+
+def set_def(in_val, value):
+    """Sets the value if it is none."""
+    if in_val is None or in_val == "":
+        in_val = value
+    return in_val
+
+
+def create_plot(x_min, x_max, func_type, param_a, param_c, clear_plot) -> str:
+    """Creates a plot and tells its static path."""
+
+    if clear_plot is not None:
+        matplotlib.pyplot.clf()
+
+    x_range = numpy.arange(x_min, x_max, 0.1)
+    if func_type == "1":
+        y_vals = param_a * numpy.sin(x_range) + param_c
+    elif func_type == "2":
+        y_vals = param_a * numpy.cos(x_range) + param_c
+    elif func_type == "3":
+        y_vals = param_a * numpy.sin(x_range) + \
+            (1-param_a) * numpy.cos(x_range) + param_c
+    matplotlib.pyplot.plot(x_range, y_vals)
+    date_time = datetime.now().strftime("%m-%d-%Y--%H-%M-%S")
+    ofname = "plots/" + date_time + ".png"
+    matplotlib.pyplot.savefig("static/" + ofname)
+    return ofname
+
+
+@app.route('/plot', methods=['GET'])
+def plot():
+    """Generates the plotted function is values are provided,
+        and returns a html page with the plot inserted."""
+    func_type = request.args.get('ft')
+    param_a = request.args.get('a')
+    param_c = request.args.get('c')
+    x_min = request.args.get('xmin')
+    x_max = request.args.get('xmax')
+    clear_plot = request.args.get('cp')
+    ofname = ""
+    if func_type is not None and param_a is not None and param_c is not None:
+        func_type = str(func_type)
+        param_a = float(param_a)
+        param_c = float(param_c)
+        x_min = float(set_def(x_min, 0))
+        x_max = float(set_def(x_max, 10))
+        ofname = create_plot(x_min, x_max, func_type,
+                             param_a, param_c, clear_plot)
+    return render_template('plot.j2', plot_fname=ofname)

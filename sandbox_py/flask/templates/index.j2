@@ -44,9 +44,10 @@
         <p>Hi, this is simple html file hosted by flask to demonstrate a basic concept of Flask. It will serve 2
             html template pages
         <ul>
-            <li><a href="/">This index file</a> is the welcome page,</li>
-            <li>And the <a href="listfile"> page</a> is the other possibility, where you can upload and list files.
+            <li><a href="/"><strong>This index file</strong></a> is the welcome page,</li>
+            <li><a href="listfile"><strong>File upload:</strong></a> you can upload and list files.
                 At the end of this page, you can also upload files and list them.</li>
+            <li><a href="plot"><strong>Plot a function:</strong></a> plot some type of functions</li>
         </ul>
         <p>To view this page properly, you need to host it with flask, because this file contains only template values
             for the css and JS files which cannot be picked up if this file is opened as a regular file. By hosting this

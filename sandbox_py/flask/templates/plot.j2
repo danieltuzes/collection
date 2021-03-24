@@ -1,0 +1,103 @@
+<!-- This file belongs to file_upload.py. -->
+<!doctype html>
+
+<head>
+    <title>Flask demo by Daniel T</title>
+    <script type="text/javascript" src="{{ url_for('static',filename='scripts/jquery-3.5.1.js') }}"></script>
+    <link href="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/css/bootstrap.css') }}" rel="stylesheet">
+    <script src="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/js/bootstrap.bundle.js') }}"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        #anchor-icon {
+            display: inline;
+            /* background:url("anchor.jpg"); */
+            /* background-repeat: no-repeat; */
+        }
+
+        a.heading-link {
+            opacity: 0;
+            margin-left: 10px;
+            text-decoration: none;
+        }
+
+        h1:hover a.heading-link {
+            opacity: 1;
+        }
+
+        h2:hover a.heading-link {
+            opacity: 1;
+        }
+
+        h3:hover a.heading-link {
+            opacity: 1;
+        }
+
+        h4:hover a.heading-link {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Flask demo</h1>
+        <h2>Plot a function</h2>
+        <h3>Input parameters</h3>
+        <div class="input-group">
+            <form method="GET" action="/plot" enctype="multipart/form-data">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">x-range (optional)</span>
+                    </div>
+                    <input type="number" class="form-control" placeholder="xmin" name="xmin">
+                    <input type="number" class="form-control" placeholder="xmax" name="xmax">
+                </div><br>
+
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="inputGroupSelect01">Function type</label>
+                    </div>
+                    <select class="custom-select" id="inputGroupSelect01" name="ft">
+                        <option value="1">A * sin(x) + C</option>
+                        <option value="2">A * cos(x) + C</option>
+                        <option value="3" selected>A * sin(x) + (1-A) * cos(x) + C</option>
+                    </select>
+                </div>
+
+                <br>
+
+                <div class="form-group">
+                    <label for="formControlRange">Value of A</label>
+                    <input type="range" class="form-control-range" min="0" max="1" step="0.05" name="a" value="0.5">
+                    <small class="form-text text-muted">Set the value between 0 and 1.</small>
+                </div><br>
+
+                <div class="form-group">
+                    <label for="C">Value of C</label>
+                    <input type="number" class="form-control" name="c" value="0" step="any">
+                    <small class="form-text text-muted">
+                        A simple constant to shift the values up or down.</small>
+                </div>
+
+<div class="form-check">
+  <input class="form-check-input" type="checkbox" value="" id="defaultCheck1" name="cp">
+  <label class="form-check-label" for="defaultCheck1">
+    Clear previous plots
+  </label>
+</div>
+
+                <div class="input-group-append">
+                    <input type="submit" value="Plot!" class="btn btn-primary">
+                </div>
+            </form>
+        </div>
+        {% if plot_fname != "" %}
+        <h3>Plotted function</h3>
+        <img src="{{ url_for('static',filename=plot_fname) }}" />{% endif %}
+    </div>
+    <script type="text/javascript" src="{{ url_for('static',filename='scripts/end_of_file_script.js') }}"></script>
+
+</body>
+
+</html>
