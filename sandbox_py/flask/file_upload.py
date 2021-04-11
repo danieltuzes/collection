@@ -14,7 +14,9 @@ import datetime
 from pathlib import Path
 from time import sleep
 from datetime import datetime
-import matplotlib.pyplot
+from typing import Tuple
+import pandas
+import matplotlib.pyplot as plt
 import numpy
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
@@ -220,31 +222,39 @@ def set_def(in_val, value):
     return in_val
 
 
-def create_plot(x_min, x_max, func_type, param_a, param_c, clear_plot) -> str:
+def create_plot(x_range: Tuple[float, float],
+                func_type,
+                f_params: Tuple[float, float],
+                clear_plot) -> str:
     """Creates a plot and tells its static path."""
 
     if clear_plot is not None:
-        matplotlib.pyplot.clf()
+        plt.clf()
 
-    x_range = numpy.arange(x_min, x_max, 0.1)
+    x_range_vals = numpy.arange(x_range[0], x_range[1], 0.1)
     if func_type == "1":
-        y_vals = param_a * numpy.sin(x_range) + param_c
+        y_vals = f_params[0] * numpy.sin(x_range_vals) + f_params[1]
     elif func_type == "2":
-        y_vals = param_a * numpy.cos(x_range) + param_c
+        y_vals = f_params[0] * numpy.cos(x_range_vals) + f_params[1]
     elif func_type == "3":
-        y_vals = param_a * numpy.sin(x_range) + \
-            (1-param_a) * numpy.cos(x_range) + param_c
-    matplotlib.pyplot.plot(x_range, y_vals)
+        y_vals = f_params[0] * numpy.sin(x_range_vals) + \
+            (1-f_params[0]) * numpy.cos(x_range_vals) + f_params[1]
+
+    plt.plot(x_range_vals, y_vals)
     date_time = datetime.now().strftime("%m-%d-%Y--%H-%M-%S")
     ofname = "plots/" + date_time + ".png"
-    matplotlib.pyplot.savefig("static/" + ofname)
+    plt.savefig("static/" + ofname)
     return ofname
 
 
 @app.route('/plot', methods=['GET'])
 def plot():
-    """Generates the plotted function is values are provided,
-        and returns a html page with the plot inserted."""
+    """Plots a function using matplotlib.
+
+    Generates the plotted function if values are provided,
+    and returns a html page with the plot inserted.
+    """
+
     func_type = request.args.get('ft')
     param_a = request.args.get('a')
     param_c = request.args.get('c')
@@ -254,10 +264,158 @@ def plot():
     ofname = ""
     if func_type is not None and param_a is not None and param_c is not None:
         func_type = str(func_type)
-        param_a = float(param_a)
-        param_c = float(param_c)
-        x_min = float(set_def(x_min, 0))
-        x_max = float(set_def(x_max, 10))
-        ofname = create_plot(x_min, x_max, func_type,
-                             param_a, param_c, clear_plot)
+        f_params = (float(param_a), float(param_c))
+        x_range = (float(set_def(x_min, 0)), float(set_def(x_max, 10)))
+        ofname = create_plot(x_range, func_type,
+                             f_params, clear_plot)
     return render_template('plot.j2', plot_fname=ofname)
+
+
+def calc_plot(params, savings) -> str:
+    """Create the plot file for the calc function."""
+    savings = numpy.array(savings)
+
+    years = [*range(0, params["term"][0]+1)]
+    labels = years[:]
+    labels[0] = "initial"
+    plt.clf()
+
+    plt.suptitle('Total savings at the end of the years')
+    plt.xticks(ticks=years, labels=labels)
+
+    plt.ylabel('Actual saving ($1000)')
+    plt.xlabel('time (year)')
+
+    plt.bar(years, savings/1000)
+
+    date_time = datetime.now().strftime("%m-%d-%Y--%H-%M-%S")
+    ofname = "calc_plots/" + date_time + ".png"
+    plt.savefig("static/" + ofname, dpi=72)
+    return ofname
+
+
+def calc_export_excel(params, savings) -> str:
+    """Writes the results into an xlsx file."""
+    dataf = pandas.DataFrame(numpy.ndarray(shape=(len(savings) + 10, 2)))
+    # this is just temporal, I am not serious
+    dataf.iloc[1, 0] = "interest rate (%)"
+    dataf.iloc[2, 0] = "yearly savings ($)"
+    dataf.iloc[3, 0] = "term (year)"
+    dataf.iloc[4, 0] = "initial saving ($)"
+    dataf.iloc[5, 0] = "total savings ($)"
+
+    dataf.iloc[1, 1] = params["interest_rate"][0]
+    dataf.iloc[2, 1] = params["yearly_savings"][0]
+    dataf.iloc[3, 1] = params["term"][0]
+    dataf.iloc[4, 1] = params["initial_saving"][0]
+    dataf.iloc[5, 1] = savings[-1]
+
+    dataf.iloc[0, :] = numpy.nan
+    dataf.iloc[6, :] = numpy.nan
+    dataf.iloc[7, :] = numpy.nan
+
+    dataf.iloc[8, 0] = "explanation"
+    dataf.iloc[8, 1] = numpy.nan
+    dataf.iloc[9, 0] = "time (year)"
+    dataf.iloc[9, 1] = "balance at the end of the year ($)"
+
+    dataf.iloc[10, 0] = "initial ($)"
+    dataf.iloc[10, 1] = params["initial_saving"][0]
+
+    for year, saving in enumerate(savings[1:]):
+        dataf.iloc[11+year, 0] = year+1
+        dataf.iloc[11+year, 1] = saving
+
+    date_time = datetime.now().strftime("%m-%d-%Y--%H-%M-%S")
+    ofname = "calc_plots/" + date_time + ".xlsx"
+    dataf.to_excel("static/" + ofname,
+                   sheet_name='savings',
+                   engine="openpyxl",
+                   index=False,
+                   header=False)
+    return ofname
+
+
+@app.route('/calc', methods=['', 'GET', 'POST'])
+def calc():
+    """Spreadsheet example with a figure.
+
+    Shows how some excel files can be replaced with flask."""
+
+    success = None
+    reason = ""
+    new_filename = ""
+    if "file" in request.files:  # if the user wants to send a file
+        nowstr = datetime.now().strftime('%Y-%m-%d_%H-%M')
+        if upload_disallowed():
+            success = False
+            reason = "The folder is full, flask didn't even try to save the file here."
+            with open(LOG_FNAME) as o_file:
+                print(nowstr,
+                      request.remote_addr, "",
+                      "File cannot be created, because the folder is full.", sep="\t", file=o_file)
+        else:
+            try:
+                uploaded_file = request.files['file']
+                new_filename = secure_filename(uploaded_file.filename)
+                new_path = os.path.join(
+                    app.config['UPLOAD_PATH'], nowstr + "_" + new_filename)
+                if uploaded_file.filename != '':
+                    if os.path.exists(new_path):
+                        success = False
+                        reason = "File already exists with the file name " + new_filename
+                        with open(LOG_FNAME, "a") as o_file:
+                            print(nowstr,
+                                  request.remote_addr,
+                                  new_filename,
+                                  "File cannot be saved: file name already exists.",
+                                  sep="\t", file=o_file)
+                    else:
+                        uploaded_file.save(new_path)
+                        success = True
+                        with open(LOG_FNAME, "a") as o_file:
+                            print(nowstr,
+                                  request.remote_addr, new_filename, "File saved.",
+                                  sep="\t", file=o_file)
+                        sleep(0.1)
+
+            except RequestEntityTooLarge as my_exception:
+                print("Exception", my_exception)
+                success = False
+                reason = str(my_exception)
+
+    params = {"interest_rate": [1, "Interest rate (%)"],
+              "yearly_savings": [10_000, "Yearly savings ($)"],
+              "term": [10, "Term (year)"],
+              "initial_saving": [100_000, "Initial saving ($)"]}
+
+    if success:  # template file is provided and successfully saved
+        dataf = pandas.read_excel(new_path, engine='openpyxl')
+        params["interest_rate"][0] = dataf.iloc[0, 1]
+        params["yearly_savings"][0] = dataf.iloc[1, 1]
+        params["term"][0] = dataf.iloc[2, 1]
+        params["initial_saving"][0] = dataf.iloc[3, 1]
+    else:
+        for param in params:
+            read_in_val = request.args.get(param)
+            if read_in_val is not None:
+                params[param][0] = float(read_in_val)
+
+    # initial saving, 0th year
+    savings = [params["initial_saving"][0],
+               params["initial_saving"][0] * (1 + params["interest_rate"][0]/100)]
+    params["term"][0] = int(params["term"][0])
+
+    for _ in range(0, params["term"][0]-1):
+        savings.append(
+            savings[-1] * (1 + params["interest_rate"][0]/100) + params["yearly_savings"][0])
+
+    return render_template("calc.html",
+                           prevent_upload=upload_disallowed(),
+                           new_filename=new_filename,
+                           success=success,
+                           reason=reason,
+                           params=params,
+                           savings=savings,
+                           plotfname=calc_plot(params, savings),
+                           excelfname=calc_export_excel(params, savings))

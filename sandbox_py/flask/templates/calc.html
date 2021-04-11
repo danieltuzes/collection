@@ -1,0 +1,138 @@
+<!-- This file belongs to file_upload.py, a mini project for a html-based file upload service. -->
+<!doctype html>
+
+<head>
+    <title>Flask demo by Daniel T</title>
+    <script type="text/javascript" src="{{ url_for('static',filename='scripts/jquery-3.5.1.js') }}"></script>
+    <link href="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/css/bootstrap.css') }}" rel="stylesheet">
+    <script type="text/javascript"
+        src="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/js/bootstrap.bundle.js') }}"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        #anchor-icon {
+            display: inline;
+            /* background:url("anchor.jpg"); */
+            /* background-repeat: no-repeat; */
+        }
+
+        a.heading-link {
+            opacity: 0;
+            margin-left: 10px;
+            text-decoration: none;
+        }
+
+        h1:hover a.heading-link {
+            opacity: 1;
+        }
+
+        h2:hover a.heading-link {
+            opacity: 1;
+        }
+
+        h3:hover a.heading-link {
+            opacity: 1;
+        }
+
+        h4:hover a.heading-link {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 class="m-5">Spreadsheet example with a plot</h1>
+    <div class="container">
+        {% if success is defined and success is not none %}
+        {% if success %}
+        <div class="alert alert-success" role="alert">
+            You have successfully imported the file {{ new_filename }}. The table below shows its content.
+        </div>
+        {% else %}
+        <div class="alert alert-danger" role="alert">
+            File import was unsuccessful, because (python says): <code>{{ reason }}</code>
+        </div>
+        {% endif %}
+        {% endif %}
+        <div class="row">
+            <div class="col text-right">
+                {% if prevent_upload is defined and prevent_upload %}
+                <div class="alert alert-danger" role="alert">
+                    <p>
+                        Can't offer to import spreadsheet, because the upload folder is full. Visit <a
+                            href="/listfile">the
+                            list
+                            of files</a> to see what prevents you importing and delete files you don't need.
+                    </p>
+                </div>
+                {% else %}
+                <form method="POST" action="/calc" enctype="multipart/form-data">
+                    <div class="input-group mb-3">
+                        <div class="custom-file">
+                            <input type="file" name="file" class="custom-file-input" id="file">
+                            <label class="custom-file-label text-left" for="file">Choose file...</label>
+                        </div>
+                        <div class="input-group-append">
+                            <input type="submit" value="Import!" class="btn btn-primary">
+
+                            <a href="{{ url_for('static',filename='savings_template.xlsx') }}"
+                                class="btn btn-outline-success">Get
+                                template!</a>
+                        </div>
+                    </div>
+                </form>
+                {% endif %}
+                <form method="GET" action="/calc" class="text-right">
+                    {% for key, value in params.items() %}
+                    <div class="form-group row">
+                        <label for="interest_rate" class="col-sm-6 col-form-label text-right">{{value[1]}}</label>
+                        <div class="col-sm-6">
+                            <input type="number" name="{{key}}" class="form-control" id="{{key}}"
+                                value="{{value[0]|int}}">
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <hr>
+                    <input type="submit" value="Recalculate!" class="btn btn-primary d-inline-flex mr-3">
+                    <div class="d-inline-flex"><strong>Total savings ($):</strong>&nbsp;{{ savings[-1]|int }}
+                    </div>
+                </form>
+            </div>
+            <div class="col"><img src="{{ url_for('static',filename=plotfname) }}"></div>
+        </div>
+        <div class="row">
+            <div class="col col-md-6">
+
+            </div>
+            <div class="col col-md-6">
+                <h2 class="d-inline-flex m-3">Explanation</h2>
+                <a href="{{ url_for('static',filename=excelfname) }}" class="d-inline-flex btn btn-success mb-3">
+                    Export to Excel!
+                </a>
+                <table class="table col-6">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-right">time (year)</th>
+                            <th scope="col" class="text-left">Actual saving ($)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row" class="text-right">Initial</th>
+                            <td class="text-left">{{ savings[0]|int }}</td>
+                        </tr>
+                        {% for saving in savings[1:] %}
+                        <tr>
+                            <th scope="row" class="text-right">{{ loop.index }}</th>
+                            <td class="text-left">{{ saving|int }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <script type="text/javascript" src="{{ url_for('static',filename='scripts/end_of_file_script.js') }}"></script>
+</body>
+
+</html>
