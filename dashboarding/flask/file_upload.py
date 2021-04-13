@@ -1,16 +1,16 @@
 """file_upload.py
-    A simple file upload and file listing Flask application.
+A simple file upload and file listing Flask application.
 
-    To run this on flask webserver,
-    - set up an environmental variable FLASK_APP to file_upload.py
-        - in PowerShell, execute $env:FLASK_APP = "file_upload.py"
-        - in CMD, set FLASK_APP=file_upload.py
-    - cd into the folder where this file is
-    - issue ``flask run``"""
+To run this on flask webserver,
+- set up an environmental variable FLASK_APP to file_upload.py
+    - in PowerShell, execute $env:FLASK_APP = "file_upload.py"
+    - in CMD, set FLASK_APP=file_upload.py
+- cd into the folder where this file is
+- issue ``flask run``
+"""
 
 import os
 import math
-import datetime
 from pathlib import Path
 from time import sleep
 from datetime import datetime
@@ -56,7 +56,7 @@ def get_files():
     for file in filenames:
         properties = os.stat(app.config['UPLOAD_PATH'] + "/" + file)
         file_sizes.append(math.ceil(properties.st_size/1024))
-        file_ctimes.append(datetime.datetime.fromtimestamp(
+        file_ctimes.append(datetime.fromtimestamp(
             properties.st_ctime).strftime('%Y-%m-%d-%H:%M'))
 
     files = list(zip(filenames, file_sizes, file_ctimes))
@@ -129,7 +129,7 @@ def delfile():
             if file_to_delete in file_names:
                 os.remove(app.config['UPLOAD_PATH'] + "/" + file_to_delete)
                 with open(LOG_FNAME, "a") as o_file:
-                    print(datetime.datetime.now().strftime('%Y-%m-%d-%H:%M'),
+                    print(datetime.now().strftime('%Y-%m-%d-%H:%M'),
                           request.remote_addr, file_to_delete, "File deleted.",
                           sep="\t", file=o_file)
 
@@ -165,13 +165,14 @@ def submit():
     success = False
     reason = ""
     new_filename = ""
+    date_time = datetime.now().strftime("%m-%d-%Y--%H-%M-%S")
 
     if upload_disallowed():
         success = False
         prevent_upload = True
         reason = "The folder is full, flask didn't even try to save the file here."
         with open(LOG_FNAME) as o_file:
-            print(datetime.datetime().now().strftime('%Y-%m-%d-%H:%M'),
+            print(date_time,
                   request.remote_addr, "",
                   "File cannot be created, because the folder is full.", sep="\t", file=o_file)
     else:
@@ -184,7 +185,7 @@ def submit():
                     success = False
                     reason = "File already exists with the file name " + new_filename
                     with open(LOG_FNAME, "a") as o_file:
-                        print(datetime.datetime.now().strftime('%Y-%m-%d-%H:%M'),
+                        print(date_time,
                               request.remote_addr,
                               new_filename,
                               "File cannot be saved: file name already exists.",
@@ -193,7 +194,7 @@ def submit():
                     uploaded_file.save(new_path)
                     success = True
                     with open(LOG_FNAME, "a") as o_file:
-                        print(datetime.datetime.now().strftime('%Y-%m-%d-%H:%M'),
+                        print(date_time,
                               request.remote_addr, new_filename, "File saved.",
                               sep="\t", file=o_file)
                     sleep(0.1)

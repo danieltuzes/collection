@@ -67,9 +67,9 @@
 **/jquery*.js
 
 # ignore flask uploaded files, log file and generated files
-sandbox_py/flask/uploads/*
-sandbox_py/flask/*.log
-sandbox_py/flask/static/plots/*.png
+**/flask/uploads/*
+**/flask/*.log
+**/flask/static/plots/*.png
 
 # settings
 settings.py
