@@ -14,6 +14,6 @@ Here I only have to have a python environment with the proper python packages, w
 
 cd into the folder where the jupyter notebook can be found and [start voilà with](https://voila.readthedocs.io/en/stable/using.html#as-a-standalone-application)
 
-```
+```bash
 voila compound_interest.ipynb
 ```

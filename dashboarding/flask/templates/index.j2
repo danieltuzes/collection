@@ -40,19 +40,22 @@
 
 <body>
     <div class="container">
-        <h1>Flask demo</h1>
-        <p>Hi, this is simple html file hosted by flask to demonstrate a basic concept of Flask. It will serve 2
-            html template pages
+        <h1>Flask and bootstrap demo</h1>
+        <p>Hi, this is simple html file hosted by flask to demonstrate a basic concept of Flask.
+            You can find several bootstrap tempaltes here along with some basic flask webapps.</p>
+        <h2>Webapps</h2>
         <ul>
             <li><a href="/"><strong>This index file</strong></a> is the welcome page,</li>
             <li><a href="listfile"><strong>File upload:</strong></a> you can upload and list files.
                 At the end of this page, you can also upload files and list them.</li>
             <li><a href="plot"><strong>Plot a function:</strong></a> plot some type of functions</li>
-            <li><a href="calc"><strong>Basic spreadsheet:</strong></a> calculate something and show on a figure</li>
+            <li><a href="calc"><strong>Basic spreadsheet:</strong></a> calculate something and show on a figure.
+            Maybe a voila webapp is available, <a hrtef="http://metal.elte.hu:8866">check it!</a>.
+            There you can also deduce where the jupyter notebook can be found, which is rendered as a voila webapp.</li>
         </ul>
         <p>To view this page properly, you need to host it with flask, because this file contains only template values
             for the css and JS files which cannot be picked up if this file is opened as a regular file. By hosting this
-            as a flask template, flask will replace the Jinja code with the proper values.
+            as a flask template, flask will replace the Jinja code with the proper values.</p>
         <ol>
             <li>Add <code>file_upload.py</code> to the <code>FLASK_APP</code> environment.<ul>
                     <li>If you are on powershell, enter <code>$env:FLASK_APP = "file_upload.py"</code> to the terminal.
@@ -64,7 +67,6 @@
                 </ul>
             </li>
         </ol>
-        </p>
         <h2>Dependencies</h2>
         This page also uses bootstrap to facilitate styling and to use some basic JS modules.
         Bootstrap and jQuery both can be downloaded and served from the host computer, so there
@@ -76,6 +78,31 @@
         <h2>Bootstrap</h2>
         Bootstrap has css files for styling and js for interactive contents. I show you 2 examples for bootstrap.
         The rest can be found at <a href="https://getbootstrap.com/docs/4.6/">Bootstrap's docs</a>.
+        <h3>Slider with feedback</h3>
+        <p>Although <a href="https://mdbootstrap.com">mdb</a> can provide a fancy way to display the state of a slider,
+            custom needs still need to be implemented manually or good luck finding a customized library.</p>
+        <p>Here I show a simple bootstrap example of a slider, where the state and sum are displayed
+            with custom written javascript.
+        <div class="row">
+            <div class="col-6">
+                <form>
+                    <div class="form-group">
+                        <label for="formControlRange1">Option A:&nbsp;<span id="value1"></span></label>
+                        <input type="range" class="form-control-range" id="formControlRange1" min="0" max="100"
+                            value="50">
+                    </div>
+                </form>
+            </div>
+            <div class="col-6">
+                <form>
+                    <div class="form-group">
+                        <label for="formControlRange2">Option B:&nbsp;<span id="value2"></span></label>
+                        <input type="range" class="form-control-range" id="formControlRange2">
+                    </div>
+                </form>
+            </div>
+            Options total:&nbsp;<span id="opcio_sum"></span>
+        </div>
         <h3>Tables</h3>
         You can easily improve the visual appearance of a table, and get a result similar to latex's result.
         <table class="table">
@@ -135,6 +162,8 @@
         <p>My <span data-toggle="tooltip" data-placement="top" title="brown">wallet</span> was in my <span
                 data-toggle="tooltip" data-placement="bottom" title="green">jacket</span>.</p>
         <h2>Upload files</h2>
+        This is the basic functionality of the file upload service. The desing here is without bootstrap
+        and without javascript. A more fancy example can be seen in the webapp examples.
         <form method="POST" action="" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="ddd">Browse for a single file on your computer</label>
