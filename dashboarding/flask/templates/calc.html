@@ -42,6 +42,10 @@
 <body>
     <h1 class="m-5">Spreadsheet example with a plot</h1>
     <div class="container">
+        <p>This html page is generated with flask and served with gevent. The interaction is handled with python. A <a
+                href="http://metal.elte.hu:8866">similar webapp</a> using Voila can found here:
+            <a href="http://metal.elte.hu:8866">http://metal.elte.hu:8866</a>
+        </p>
         {% if success is defined and success is not none %}
         {% if success %}
         <div class="alert alert-success" role="alert">

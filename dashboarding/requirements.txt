@@ -1,0 +1,11 @@
+nodejs
+flask
+numpy
+pandas
+matplotlib
+jupyter
+jupyterlab
+gevent
+git
+openpyxl
+voila
