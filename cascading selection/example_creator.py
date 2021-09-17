@@ -28,7 +28,7 @@ def create_data():
     people.to_csv("people.csv", index=False)
 
 
-def create_assigner():
+def create_selector():
     """Create the file of selection rules and assigned values."""
     sel_r_data = {"visitor": True,
                   "hall": "base",
@@ -59,4 +59,4 @@ def create_assigner():
 
 
 create_data()
-create_assigner()
+create_selector()
