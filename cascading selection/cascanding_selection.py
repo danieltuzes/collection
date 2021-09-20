@@ -66,7 +66,7 @@ def _calc_scores(m_rule: pd.DataFrame, priority) -> None:
 dat = pd.read_csv("people.csv")
 
 sel_rule = pd.read_csv("selection_rules.csv",
-                       dtype={"ID": "Int64",
+                       dtype={"personal ID": "Int64",
                               "family name": str,
                               "given name": str,
                               "fav color": str,
@@ -74,7 +74,7 @@ sel_rule = pd.read_csv("selection_rules.csv",
                               "hall": str,
                               "buffet": str})
 
-priori = ["ID", "family name", "given name", "fav color", "visitor"]
+priori = ["personal ID", "family name", "given name", "fav color", "visitor"]
 
 result = cascading_assignment(dat, sel_rule, priori)
 

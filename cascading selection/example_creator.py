@@ -14,7 +14,7 @@ colors = ["red", "green", "blue", "yellow", "cyan", "magenta"]
 
 LENGTH = len(colors) * len(given_names) * len(family_names)
 
-p_data = {"ID": range(LENGTH),
+p_data = {"personal ID": range(LENGTH),
           "family name": np.random.choice(family_names, LENGTH),
           "given name": np.random.choice(given_names, LENGTH),
           "fav color": np.random.choice(colors, LENGTH),
@@ -50,9 +50,9 @@ def create_selector():
                   "given name",
                   "hall"]] = ["SMITH", "Maria", "famiglia"]
 
-    sel_r.loc[6, ["ID", "hall"]] = [0, "VIP"]
-    sel_r.loc[7, ["ID", "hall"]] = [1, "VIP"]
-    sel_r.loc[8, ["ID", "hall"]] = [42, "VIP"]
+    sel_r.loc[6, ["personal ID", "hall"]] = [0, "VIP"]
+    sel_r.loc[7, ["personal ID", "hall"]] = [1, "VIP"]
+    sel_r.loc[8, ["personal ID", "hall"]] = [42, "VIP"]
     sel_r.loc[9, "hall"] = "base"
 
     sel_r.to_csv("selection_rules.csv", index=False)
