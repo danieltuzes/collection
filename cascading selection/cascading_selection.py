@@ -16,14 +16,20 @@ def cascading_assignment(data: pd.DataFrame,
         The data which contains the entries with properties
         and to which further properties should be added.
     sel_r : pd.DataFrame
-        [description]
+        The selection rules and property values to be assigned.
+        Column names contained within the priority list and
+        properties on which the filters can be applied, the remaining
+        are the new properties that needed to be assigned to
+        the data.
     priority : List[str]
-        [description]
+        The name of the columns containing properties on which
+        selection rules can be applied.
 
     Returns
     -------
     pd.DataFrame
-        [description]
+        The data together with the newly assigned properties.
+        Keeps the order of entries (aka stable).
     """
     # identify the column names containing hte values needed to be assigned
     val_n = sel_r.columns.to_list()
