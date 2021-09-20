@@ -30,6 +30,10 @@ def cascading_assignment(data: pd.DataFrame,
         val_n.remove(item)
 
     ret = data.assign(**{ass_val_name: None for ass_val_name in val_n})
+
+    # put index to a regular column so that merge keeps it
+    ret.reset_index(inplace=True)
+
     sns = _calc_scores(sel_r, priority)  # scores and selectors
 
     sns.sort_values("score", inplace=True)
@@ -37,14 +41,12 @@ def cascading_assignment(data: pd.DataFrame,
         score, selectors = rule_property[["score", "selectors"]]
 
         rule_group = sel_r.loc[sns["score"] == score, [*selectors, *val_n]]
-        merged = pd.merge(ret,
+        merged = pd.merge(ret[[data.index.name, *priority]],
                           rule_group,
                           how="inner",
-                          on=selectors,
-                          suffixes=[None, " new"])
-
-        col_tr = {old_name + " new": old_name for old_name in val_n}
-        ret[val_n] = merged.filter(like=" new").rename(columns=col_tr)
+                          on=selectors)
+        ret.update(merged.set_index(data.index.name)[val_n])
+    ret.set_index(data.index.name)
     return ret
 
 
@@ -64,7 +66,7 @@ def _calc_scores(m_rule: pd.DataFrame, priority) -> None:
 
 
 dat = pd.read_csv("people.csv")
-
+dat.index.name = "pd index"
 sel_rule = pd.read_csv("selection_rules.csv",
                        dtype={"personal ID": "Int64",
                               "family name": str,
