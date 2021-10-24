@@ -15,12 +15,12 @@ from pathlib import Path
 from time import sleep
 from datetime import datetime
 from typing import Tuple
-import pandas
 import matplotlib.pyplot as plt
 import numpy
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+import pandas
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 
 
 # user defined settings go here
@@ -113,7 +113,11 @@ def upload_file():
 def listfiles():
     """Returns the ``list.j2`` file."""
     folder_size = get_size(app.config['UPLOAD_PATH'])
-    return render_template('list.j2', files=get_files(), prevent_upload=upload_disallowed(), folder_size=folder_size, limit=LIMITS)
+    return render_template('list.j2',
+                           files=get_files(),
+                           prevent_upload=upload_disallowed(),
+                           folder_size=folder_size,
+                           limit=LIMITS)
 
 
 @app.route('/delfile', methods=['GET'])
@@ -125,13 +129,13 @@ def delfile():
     if file_to_delete is not None and file_to_delete in file_names:
         if request.args.get('confirmed') is None:
             return render_template('del_confirmation.j2', file=file_to_delete)
-        else:
-            if file_to_delete in file_names:
-                os.remove(app.config['UPLOAD_PATH'] + "/" + file_to_delete)
-                with open(LOG_FNAME, "a") as o_file:
-                    print(datetime.now().strftime('%Y-%m-%d-%H:%M'),
-                          request.remote_addr, file_to_delete, "File deleted.",
-                          sep="\t", file=o_file)
+
+        if file_to_delete in file_names:
+            os.remove(app.config['UPLOAD_PATH'] + "/" + file_to_delete)
+            with open(LOG_FNAME, "a", encoding="utf-8") as o_file:
+                print(datetime.now().strftime('%Y-%m-%d-%H:%M'),
+                      request.remote_addr, file_to_delete, "File deleted.",
+                      sep="\t", file=o_file)
 
     folder_size = get_size(app.config['UPLOAD_PATH'])
     return render_template('list.j2',
@@ -171,7 +175,7 @@ def submit():
         success = False
         prevent_upload = True
         reason = "The folder is full, flask didn't even try to save the file here."
-        with open(LOG_FNAME) as o_file:
+        with open(LOG_FNAME, encoding="utf-8") as o_file:
             print(date_time,
                   request.remote_addr, "",
                   "File cannot be created, because the folder is full.", sep="\t", file=o_file)
@@ -184,7 +188,7 @@ def submit():
                 if os.path.exists(new_path):
                     success = False
                     reason = "File already exists with the file name " + new_filename
-                    with open(LOG_FNAME, "a") as o_file:
+                    with open(LOG_FNAME, "a", encoding="utf-8") as o_file:
                         print(date_time,
                               request.remote_addr,
                               new_filename,
@@ -193,7 +197,7 @@ def submit():
                 else:
                     uploaded_file.save(new_path)
                     success = True
-                    with open(LOG_FNAME, "a") as o_file:
+                    with open(LOG_FNAME, "a", encoding="utf-8") as o_file:
                         print(date_time,
                               request.remote_addr, new_filename, "File saved.",
                               sep="\t", file=o_file)
@@ -351,7 +355,7 @@ def calc():
         if upload_disallowed():
             success = False
             reason = "The folder is full, flask didn't even try to save the file here."
-            with open(LOG_FNAME) as o_file:
+            with open(LOG_FNAME, encoding="utf-8") as o_file:
                 print(nowstr,
                       request.remote_addr, "",
                       "File cannot be created, because the folder is full.", sep="\t", file=o_file)
@@ -365,7 +369,7 @@ def calc():
                     if os.path.exists(new_path):
                         success = False
                         reason = "File already exists with the file name " + new_filename
-                        with open(LOG_FNAME, "a") as o_file:
+                        with open(LOG_FNAME, "a", encoding="utf-8") as o_file:
                             print(nowstr,
                                   request.remote_addr,
                                   new_filename,
@@ -374,7 +378,7 @@ def calc():
                     else:
                         uploaded_file.save(new_path)
                         success = True
-                        with open(LOG_FNAME, "a") as o_file:
+                        with open(LOG_FNAME, "a", encoding="utf-8") as o_file:
                             print(nowstr,
                                   request.remote_addr, new_filename, "File saved.",
                                   sep="\t", file=o_file)
@@ -397,10 +401,10 @@ def calc():
         params["term"][0] = dataf.iloc[2, 1]
         params["initial_saving"][0] = dataf.iloc[3, 1]
     else:
-        for param in params:
-            read_in_val = request.args.get(param)
+        for paramname, val_n_descr in params.items():
+            read_in_val = request.args.get(paramname)
             if read_in_val is not None:
-                params[param][0] = float(read_in_val)
+                val_n_descr[0] = float(read_in_val)
 
     # initial saving, 0th year
     savings = [params["initial_saving"][0],
