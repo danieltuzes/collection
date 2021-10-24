@@ -424,3 +424,27 @@ def calc():
                            savings=savings,
                            plotfname=calc_plot(params, savings),
                            excelfname=calc_export_excel(params, savings))
+
+
+numpy.random.seed(0)
+
+
+@app.route('/random', methods=['GET'])
+def random():
+    """Gives the desired number of random numbers
+    with the state of the random number generator.
+    """
+
+    size = request.args.get('size')
+
+    if size is not None:
+        size = int(size)
+    else:
+        size = 1
+
+    state = numpy.random.get_state()
+    data = numpy.random.random(size=size)
+
+    table = pandas.DataFrame(data=data)
+
+    return table.to_html() + repr(state)
