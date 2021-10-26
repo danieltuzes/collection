@@ -106,15 +106,15 @@ The first few lines of the results are shown in the table below.
 
 |  PID | family name | given name | fav color | visitor | hall     | buffet |
 | ---: | :---------- | :--------- | :-------- | :------ | :------- | :----- |
-|    0 | GARCIA      | Mohamed    | blue      | False   |          |        |
+|    0 | GARCIA      | Mohamed    | blue      | False   |          | street |
 |    1 | SMITH       | Mohamed    | green     | True    | VIP      | 1st    |
 |    2 | BROWN       | Wei        | magenta   | True    | base     | 3rd    |
 |    3 | BROWN       | Jose       | yellow    | True    | base     | 3rd    |
 |    4 | DAVIS       | Ahmed      | magenta   | True    | base     | 3rd    |
-|    5 | MARTINEZ    | Nushi      | red       | False   |          |        |
+|    5 | MARTINEZ    | Nushi      | red       | False   |          | street |
 |    6 | BROWN       | Muhammad   | yellow    | True    | base     | 3rd    |
 |   27 | SMITH       | Ali        | blue      | True    | prim     | 2nd    |
-|  333 | SMITH       | Maria      | red       | True    | famiglia | 3rd    |
+|  333 | SMITH       | Maria      | red       | True    | famiglia | 1st    |
 
 - persons with PID (personal ID) 0 and 5 don't have assigned hall, and have buffet "street", because they match the first (line 0) criterion.
 - the person with PID 1 is in the VIP hall, because selection rule 9 applies.
