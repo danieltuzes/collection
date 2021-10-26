@@ -20,7 +20,8 @@ def cascading_assignment(data: pd.DataFrame,
         Column names contained within the priority list and
         properties on which the filters can be applied, the remaining
         are the new properties that needed to be assigned to
-        the data.
+        the data. Use nan values to represent a selection rules that
+        applies to all entries, aka * or ALL.
     priority : List[str]
         The name of the columns containing properties on which
         selection rules can be applied.
@@ -31,7 +32,7 @@ def cascading_assignment(data: pd.DataFrame,
         The data together with the newly assigned properties.
         Keeps the order of entries (aka stable).
     """
-    # identify the column names containing hte values needed to be assigned
+    # identify the column names containing the values needed to be assigned
     val_n = sel_r.columns.to_list()
     for item in priority:
         val_n.remove(item)
@@ -46,7 +47,11 @@ def cascading_assignment(data: pd.DataFrame,
     sns.sort_values("score", inplace=True)
     for _, rule_property in sns.drop_duplicates("score").iterrows():
         score, selectors = rule_property[["score", "selectors"]]
-
+        if score == 0:  # default assignment
+            def_vals = sel_r.loc[sns["score"] == score, [*val_n]]
+            assert len(def_vals) == 1
+            ret[[*val_n]] = def_vals.iloc[0].to_list()
+            continue
         rule_group = sel_r.loc[sns["score"] == score, [*selectors, *val_n]]
         merged = pd.merge(ret[[data.index.name, *priority]],
                           rule_group,

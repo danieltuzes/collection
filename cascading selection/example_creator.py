@@ -14,7 +14,7 @@ colors = ["red", "green", "blue", "yellow", "cyan", "magenta"]
 
 LENGTH = len(colors) * len(given_names) * len(family_names)
 
-p_data = {"personal ID": range(LENGTH),
+p_data = {"PID": range(LENGTH),
           "family name": np.random.choice(family_names, LENGTH),
           "given name": np.random.choice(given_names, LENGTH),
           "fav color": np.random.choice(colors, LENGTH),
@@ -36,24 +36,26 @@ def create_selector():
     columns = [*p_data, "hall", "buffet"]
     sel_r = pd.DataFrame(data=sel_r_data, columns=[*columns])
 
-    sel_r.loc[0, ["fav color", "hall"]] = ["red", "prim"]
-    sel_r.loc[1, ["fav color", "hall"]] = ["green", "prim"]
-    sel_r.loc[2, ["fav color", "hall"]] = ["blue", "prim"]
+    sel_r.loc[0, ["visitor", "buffet", "hall"]] = (pd.NA, "street", pd.NA)
+    sel_r.loc[1, "hall"] = "base"
 
-    sel_r.loc[3, ["given name",
+    sel_r.loc[2, ["fav color", "hall"]] = ["red", "prim"]
+    sel_r.loc[3, ["fav color", "hall"]] = ["green", "prim"]
+    sel_r.loc[4, ["fav color", "hall"]] = ["blue", "prim"]
+
+    sel_r.loc[5, ["given name",
                   "fav color",
                   "hall"]] = ["Maria", "red", "common"]
-    sel_r.loc[4, ["family name",
+    sel_r.loc[6, ["family name",
                   "fav color",
                   "hall"]] = ["SMITH", "red", "common"]
-    sel_r.loc[5, ["family name",
+    sel_r.loc[7, ["family name",
                   "given name",
                   "hall"]] = ["SMITH", "Maria", "famiglia"]
 
-    sel_r.loc[6, ["personal ID", "hall"]] = [0, "VIP"]
-    sel_r.loc[7, ["personal ID", "hall"]] = [1, "VIP"]
-    sel_r.loc[8, ["personal ID", "hall"]] = [42, "VIP"]
-    sel_r.loc[9, "hall"] = "base"
+    sel_r.loc[8, ["PID", "hall"]] = [0, "VIP"]
+    sel_r.loc[9, ["PID", "hall"]] = [1, "VIP"]
+    sel_r.loc[10, ["PID", "hall"]] = [42, "VIP"]
 
     sel_r.to_csv("selection_rules.csv", index=False)
 
