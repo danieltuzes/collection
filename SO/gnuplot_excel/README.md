@@ -1,0 +1,1 @@
+https://stackoverflow.com/questions/69804517/gnuplot-is-there-a-way-i-can-plot-data-from-an-excel-spreadsheet-with-gnuplot/69833655#69833655
