@@ -15,5 +15,7 @@ Here I only have to have a python environment with the proper python packages, w
 cd into the folder where the jupyter notebook can be found and [start voilà with](https://voila.readthedocs.io/en/stable/using.html#as-a-standalone-application)
 
 ```bash
-voila compound_interest.ipynb
+voila compound_interest.ipynb --MappingKernelManager.cull_interval=3600 --MappingKernelManager.cull_idle_timeout=7200
 ```
+
+The last two options tells the underlying jupyter server to check for idle kernels every hour and those which are idle for more than 7200 seconds, are terminated. This helps to protect the memory.
