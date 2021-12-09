@@ -1,5 +1,5 @@
 """Nested expressions of numbers with the
-elementary operators and 1 or 2 argumental functions.
+elementary operators and 1 or 2 arguments functions.
 
 A number is defined using EBNF as:
 
@@ -149,7 +149,7 @@ def consume_op(seq: str, pos: int) -> Tuple[int, int]:
         "Expression %s at %d is not an elementary operator." % (seq, pos))
 
 
-def consume_value(seq: str, pos: int) -> Tuple[int, int]:
+def consume_value(seq: str, pos: int) -> Tuple[Union[int, float], int]:
     """Read in a number or a function having 1 or 2 arguments."""
     start = pos
     while seq[pos] in FUNC_C:
@@ -197,6 +197,11 @@ def consume_comma(seq: str, pos: int) -> int:
     if seq[pos] != ",":
         raise ValueError("%s at position %d is not a ',' char" % (seq, pos))
     return pos+1
+
+
+def consume_evalue(seq: str, pos: int) -> Tuple[Union[int, float], int]:
+    """1 or more value connected by an eop."""
+    val, pos = consume_value(seq, pos)
 
 
 if __name__ == "__main__":
