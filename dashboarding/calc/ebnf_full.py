@@ -182,5 +182,5 @@ if __name__ == "__main__":
             print(consume_expr(my_text, 0)[0])
         except ValueError as error:
             print(f"It is not a valid expression: {error}")
-        except Exception as error:
+        except Exception as error:  # pylint: disable = broad-except
             print(f"It is not a valid expression: {error}")

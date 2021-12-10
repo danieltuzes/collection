@@ -1,0 +1,19 @@
+<!-- This file belongs to file_upload.py, a project for a mini python webapps. -->
+<!doctype html>
+
+<head>
+    <title>Flask demo by Daniel T</title>
+    <script type="text/javascript" src="{{ url_for('static',filename='scripts/jquery-3.5.1.js') }}"></script>
+    <link href="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/css/bootstrap.css') }}" rel="stylesheet">
+    <script type="text/javascript"
+        src="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/js/bootstrap.bundle.js') }}"></script>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+
+<body class="container">
+    <p>Type in your expression to be evaluated. If it can be evaluated, then python's eval is also executed and both results are shown.</p>
+    <hr/>
+    {{ marked_up|safe }}
+</body>
+
+</html>

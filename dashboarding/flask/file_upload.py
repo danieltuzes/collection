@@ -14,14 +14,16 @@ import math
 from pathlib import Path
 from time import sleep
 from datetime import datetime
-from typing import Tuple
+import inspect
+from typing import Tuple, Callable
 import matplotlib.pyplot as plt
 import numpy
 import pandas
+import markdown
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
-
+from ebnf_full import consume_expr
 
 # user defined settings go here
 from settings import *  # pylint: disable=wildcard-import
@@ -341,7 +343,7 @@ def calc_export_excel(params, savings) -> str:
     return ofname
 
 
-@app.route('/calc', methods=['', 'GET', 'POST'])
+@app.route('/calc', methods=['GET', 'POST'])
 def calc():
     """Spreadsheet example with a figure.
 
@@ -447,4 +449,36 @@ def random():
 
     table = pandas.DataFrame(data=data)
 
-    return table.to_html() + repr(state)
+    mdtext = ("# Generate random numbers\n\n"
+              "An example that a webapp can generate random numbers "
+              "and reproduce the results. "
+              "The internal state at the end is also shown.\n"
+              "## Source code of the function\n\nThe function is preceded"
+              " by setting the seed value, once per webapp start.\n"
+              "``` python\n"
+              f"numpy.random.seed(0)\n\n{inspect.getsource(random)}```\n")
+
+    marked_up = (markdown.markdown(mdtext, extensions=['fenced_code',
+                                                       'codehilite']) +
+                 table.to_html() +
+                 repr(state))
+    return render_template("header_from_md.j2", marked_up=marked_up)
+
+
+@app.route("/evaluate", methods=['GET', 'POST'])
+def evaluate():
+    """Evaluate an expression."""
+    expr = request.args.get('expression')
+    if expr is not None:
+        try:
+            res = consume_expr(expr, 0)[0]
+        except ValueError as error:
+            res = ("It is not a valid expression "
+                   f" and the interpreter was prepared for this: {error}")
+        except Exception as error:  # pylint: disable = broad-except
+            res = (f"It is not a valid expression: {error}")
+    with open("../calc/README.md", "r", encoding="utf-8") as ifile:
+        readme = ifile.read()
+        marked_up = markdown.markdown(readme, extensions=['fenced_code',
+                                                          'codehilite'])
+    return render_template("eval.j2", marked_up=marked_up)

@@ -1,10 +1,14 @@
 # Calcualtor
 
-The aim is to create a webapp the can perform operations on the uploaded data in 3 different ways:
+- [Calcualtor](#calcualtor)
+  - [How the code works](#how-the-code-works)
+  - [Code development](#code-development)
+
+The aim is to create a webapp the can perform operations on the uploaded data in 5 different ways:
 
 1. By calling numpy's vectorized (?) functions such as `array_for`, `array_map`, `fromiter` an `vectorize`
 2. Doing similarly with pandas
-3. Invoking numba
+3. Invoking Numba
 4. call the already vectorized numpy functions after interpreting the operation
 5. create a python module in cpp, and call that
 
@@ -37,5 +41,7 @@ Without defining functions, we define expressions. It starts with either a numbe
 saopn  ⇐ | sin | cos | tan | arcsin | arccos | arctan | sinh | cosh | arctanh
 taopn  ⇐ pow
 eop    ⇐ + | - | * | /
-expr   ⇐ number | saopn"("expr")" | taopn "(" expr , expr ")" { eop expr }
+expr   ⇐ ( number | ( saopn "(" expr ")" ) | ( taopn "(" expr , expr ")" ) ) { eop expr }
 ```
+
+In this last example, the unquoted parenthesis represent grouping, and quoted parenthesis represent the parenthesis character.
