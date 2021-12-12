@@ -480,5 +480,6 @@ def evaluate():
     with open("../calc/README.md", "r", encoding="utf-8") as ifile:
         readme = ifile.read()
         marked_up = markdown.markdown(readme, extensions=['fenced_code',
-                                                          'codehilite'])
+                                                          'codehilite',
+                                                          'tables'])
     return render_template("eval.j2", marked_up=marked_up)

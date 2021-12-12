@@ -1,6 +1,7 @@
-# Calcualtor
+# Calculator
 
-- [Calcualtor](#calcualtor)
+- [Calculator](#calculator)
+  - [How to use](#how-to-use)
   - [How the code works](#how-the-code-works)
   - [Code development](#code-development)
 
@@ -13,6 +14,22 @@ The aim is to create a webapp the can perform operations on the uploaded data in
 5. create a python module in cpp, and call that
 
 The results would be shown to the users, as well as a short analysis on the performance.
+
+## How to use
+
+The program will be able to accept two mandatory inputs:
+
+- an expression to be calculated, e.g. $$f(x,y) = sin(x \cdot y) + 0.2 \cdot \operatorname{pow}(y,2)$$
+- A csv file including the variables as column headers and (the index column is optional)
+
+| index |   x    |    y    |
+| :---: | :----: | :-----: |
+|   1   | 0.2121 | 0.5343  |
+|   2   | 0.124  | 0.2121  |
+|   3   | 0.8892 | 0.21222 |
+|   4   | 0.2321 |  0.21   |
+
+The return values are printed into a csv file and offered the user to download, but the main information is the calculation time.
 
 ## How the code works
 
