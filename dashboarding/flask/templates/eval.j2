@@ -12,6 +12,19 @@
 
 <body class="container">
     <p>Type in your expression to be evaluated. If it can be evaluated, then python's eval is also executed and both results are shown.</p>
+    <form action="/evaluate" method="post">
+    <div class="form-group">
+    <label for="expression">Expresion</label>
+    <input type="text" class="form-control" id="expression" name="expression" aria-describedby="expressionHelp" placeholder="sin(2*3.14159*pow(0.01,2))">
+    <small id="expressionHelp" class="form-text text-muted">The expression you would like to evaluate. Can contain sin, pow, and the elementary operators.</small>
+    </form>
+    {% if ret is not none %}
+    <hr/>
+    {% if ret[0] %}<div class="alert alert-success" role="alert">
+    {% else %}<div class="alert alert-warning" role="alert">
+    {% endif %}
+    {{ ret[1]|safe }}</div>
+    {% endif %}
     <hr/>
     {{ marked_up|safe }}
 </body>

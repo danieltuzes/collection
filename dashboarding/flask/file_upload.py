@@ -468,18 +468,28 @@ def random():
 @app.route("/evaluate", methods=['GET', 'POST'])
 def evaluate():
     """Evaluate an expression."""
-    expr = request.args.get('expression')
+    expr = request.form.get('expression')
+    ret = None
     if expr is not None:
         try:
             res = consume_expr(expr, 0)[0]
+            success = True
         except ValueError as error:
             res = ("It is not a valid expression "
                    f" and the interpreter was prepared for this: {error}")
+            success = False
         except Exception as error:  # pylint: disable = broad-except
             res = (f"It is not a valid expression: {error}")
+            success = False
+        summary = (f"The input value\n> `{expr}`\n\nwas provided, "
+                   f"and the return value is\n> {res}")
+        if success:
+            summary += ("\n\nUsing python's `eval`, the return values is\n"
+                        f"> {eval(expr)}")  # pylint: disable = eval-used
+        ret = [success, markdown.markdown(summary)]
     with open("../calc/README.md", "r", encoding="utf-8") as ifile:
         readme = ifile.read()
         marked_up = markdown.markdown(readme, extensions=['fenced_code',
                                                           'codehilite',
                                                           'tables'])
-    return render_template("eval.j2", marked_up=marked_up)
+    return render_template("eval.j2", ret=ret, marked_up=marked_up)
