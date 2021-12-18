@@ -1,15 +1,22 @@
-"""Expression interpreter. Interprets +-*/, sin, cos, sinh, cosh, pow. Example:
+"""Apply a single argument function on a numpy array.
 
-1-pow(1-pow(cos(1e-3),2),0.5)*1e3"""
+The array is a numpy ndarray of random values in [0,1), denoted by x,
+and the function definition has to be given. As an example,
+one can give the right hand side of
+$$f(x) = sin(2*3.14159*x)/x$$
+"""
 
+import string
 import math
 from typing import List, Union, Tuple
+import numpy as np
+
+Value = Union[float, int, np.ndarray]
 
 DIGITS = "0123456789"
 FUNC_1 = ["", "sin", "cos", "tan", "arcsin",
           "arccos", "arctan", "sinh", "cosh", "arctanh"]
 FUNC_2 = ["pow"]
-FUNC_C = "".join([*FUNC_1, *FUNC_2])  # str of possible chars for a func
 PARENT = 0
 
 
@@ -64,25 +71,29 @@ def consume_frac(seq: str, pos: int) -> Tuple[float, int]:
 
 
 def consume_expr(seq: str,
+                 arr: np.ndarray,
+                 var_name: str,
                  pos: int = 0,
-                 until: str = "") -> Tuple[Union[float, int], int]:
+                 until: str = "") -> Tuple[Value, int]:
     """Consume a single value starting from pos."""
-    values: List[Union[float, int]] = []
+    values: List[Value] = []
     ops = {1: [], 2: [], 3: [], 4: []}  # +, -, * and /
     i: int = 0  # number of operators within ops
 
-    value, pos = consume_value(seq, pos)
+    value, pos = consume_value(seq, arr, var_name, pos)
     values.append(value)
 
     while pos < len(seq) and (not until or (seq[pos] != until)):
         operator, pos = consume_op(seq, pos)
         ops[operator].append(i)
         i += 1
-        value, pos = consume_value(seq, pos)
+        value, pos = consume_value(seq, arr, var_name, pos)
         values.append(value)
 
+    # elementary operators can be applied on vectors the same way as on scalars
     while ops[3] or ops[4]:
-        if ((ops[3] and ops[4]) and (ops[3][0] < ops[4][0])) or (ops[3] and not ops[4]):
+        if (((ops[3] and ops[4]) and (ops[3][0] < ops[4][0]))
+                or (ops[3] and not ops[4])):
             values[ops[3][0]+1] = values[ops[3][0]] * values[ops[3][0]+1]
             ops[3].pop(0)
         else:
@@ -90,7 +101,8 @@ def consume_expr(seq: str,
             ops[4].pop(0)
 
     while ops[1] or ops[2]:
-        if ((ops[1] and ops[2]) and (ops[1][0] < ops[2][0])) or (ops[1] and not ops[2]):
+        if (((ops[1] and ops[2]) and (ops[1][0] < ops[2][0]))
+                or (ops[1] and not ops[2])):
             lhv = values[ops[1][0]]
             ops[1].pop(0)
             rhv_i = min([*ops[1], *ops[2], len(values)-1])
@@ -104,40 +116,66 @@ def consume_expr(seq: str,
     return values[-1], pos
 
 
-def consume_value(seq: str, pos: int) -> Tuple[Union[float, int], int]:
+def consume_value(seq: str,
+                  arr: np.ndarray,
+                  var_name: str,
+                  pos: int) -> Tuple[Value, int]:
     """Reads in a function or number values."""
     start = pos
-    while seq[pos] in FUNC_C:
+    while pos < len(seq) and seq[pos] in string.ascii_lowercase:
         pos += 1
     if pos > start or seq[start] == "(":
         func_name = seq[start:pos]
-        pos = consume_parent(seq, pos)
-        if func_name in FUNC_1:
-            num, pos = consume_expr(seq, pos, ")")
-            pos = consume_parent(seq, pos)
-            if func_name == "":
-                value = num
-            elif func_name == "sin":
-                value = math.sin(num)
-            elif func_name == "cos":
-                value = math.cos(num)
-            elif func_name == "sinh":
-                value = math.sinh(num)
-            elif func_name == "cosh":
-                value = math.cosh(num)
-        elif func_name in FUNC_2:
-            num_1, pos = consume_expr(seq, pos, ",")
-            pos = consume_comma(seq, pos)
-            num_2, pos = consume_expr(seq, pos, ")")
-            pos = consume_parent(seq, pos)
-            if func_name == "pow":
-                value = num_1 ** num_2
+        if func_name == var_name:
+            value = arr
         else:
-            raise ValueError(f"{func_name} is not an function name in seq")
+            pos = consume_parent(seq, pos)
+            if func_name in FUNC_1:
+                num, pos = consume_expr(seq, arr, var_name, pos, ")")
+                pos = consume_parent(seq, pos)
+                if func_name == "":
+                    value = num
+                else:
+                    value = s_op(func_name, num)
+            elif func_name in FUNC_2:
+                num_1, pos = consume_expr(seq, arr, var_name, pos, ",")
+                pos = consume_comma(seq, pos)
+                num_2, pos = consume_expr(seq, arr, var_name, pos, ")")
+                pos = consume_parent(seq, pos)
+                if func_name == "pow":  # pow is good for arrays too
+                    value = num_1 ** num_2
+            else:
+                raise ValueError(
+                    f"{func_name} is not a function name in {seq}")
     else:
         value, pos = consume_number(seq, pos)
 
     return value, pos
+
+
+def s_op(func_name: str, num: Value) -> Value:
+    """Apply single argument operator func_name on num.
+
+    Defined to reduce number of branches."""
+    if isinstance(num, np.ndarray):
+        if func_name == "sin":
+            value = np.sin(num)
+        elif func_name == "cos":
+            value = np.cos(num)
+        elif func_name == "sinh":
+            value = np.sinh(num)
+        elif func_name == "cosh":
+            value = np.cosh(num)
+    else:
+        if func_name == "sin":
+            value = math.sin(num)
+        elif func_name == "cos":
+            value = math.cos(num)
+        elif func_name == "sinh":
+            value = math.sinh(num)
+        elif func_name == "cosh":
+            value = math.cosh(num)
+    return value
 
 
 def consume_parent(seq: str, pos: int) -> int:
@@ -177,10 +215,13 @@ def consume_op(seq: str, pos: int) -> Tuple[int, int]:
 
 
 if __name__ == "__main__":
+    data = np.array([0, 0.1, 0.2, 0.5, 1, 2, 5])
+    print("Apply a function on the data x:")
     while True:
         my_text = input()
+
         try:
-            print(consume_expr(my_text, 0)[0])
+            print(consume_expr(my_text, data, "x", 0)[0])
         except ValueError as error:
             print(f"It is not a valid expression: {error}")
         except Exception as error:  # pylint: disable = broad-except

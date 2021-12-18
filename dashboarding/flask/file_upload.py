@@ -11,6 +11,7 @@ To run this on flask webserver,
 
 import os
 import math
+from math import sin, cos  # pylint: disable=unused-import
 from pathlib import Path
 from time import sleep
 from datetime import datetime
