@@ -4,6 +4,9 @@ The array is a numpy ndarray of random values in [0,1), denoted by x,
 and the function definition has to be given. As an example,
 one can give the right hand side of
 $$f(x) = sin(2*3.14159*x)/x$$
+
+Similar to ebnf_full, but this can accept a function argument,
+which is an array and can be arbitrary long.
 """
 
 import string
