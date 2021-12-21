@@ -50,12 +50,13 @@
                 At the end of this page, you can also upload files and list them.</li>
             <li><a href="plot"><strong>Plot a function:</strong></a> plot some type of functions</li>
             <li><a href="calc"><strong>Basic spreadsheet:</strong></a> calculate something and show on a figure.
-            Maybe a voila webapp is available, <a href="http://metal.elte.hu:8866">check it!</a>
-            There you can also deduce where the jupyter notebook can be found, which is rendered as a voila webapp.</li>
+                Maybe a voila webapp is available, <a href="http://metal.elte.hu:8866">check it!</a>
+                There you can also deduce where the jupyter notebook can be found, which is rendered as a voila webapp.
+            </li>
             <li><a href="random"><strong>Random number generator: </strong></a>Generate and array of
-            pseudo random numbers and print out the state of the underlying Mersenne Twister engine.</li>
+                pseudo random numbers and print out the state of the underlying Mersenne Twister engine.</li>
             <li><a href="evaluate"><strong>Evaluate expressions: </strong></a>Evaluate expressions typed in as text
-            applied on an array of numbers. Compare the calculation time of the different methods.</li>
+                applied on an array of numbers. Compare the calculation time of the different methods.</li>
         </ul>
         <p>To view this page properly, you need to host it with flask, because this file contains only template values
             for the css and JS files which cannot be picked up if this file is opened as a regular file. By hosting this
@@ -87,68 +88,68 @@
             custom needs still need to be implemented manually or good luck finding a customized library.</p>
         <p>Here I show a simple bootstrap example of a slider, where the state and sum are displayed
             with custom written javascript.
-        <div class="row">
-            <div class="col-6">
-                <form>
-                    <div class="form-group">
-                        <label for="formControlRange1">Option A:&nbsp;<span id="value1"></span></label>
-                        <input type="range" class="form-control-range" id="formControlRange1" min="0" max="100"
-                            value="50">
-                    </div>
-                </form>
+            <div class="row">
+                <div class="col-6">
+                    <form>
+                        <div class="form-group">
+                            <label for="formControlRange1">Option A:&nbsp;<span id="value1"></span></label>
+                            <input type="range" class="form-control-range" id="formControlRange1" min="0" max="100"
+                                value="50">
+                        </div>
+                    </form>
+                </div>
+                <div class="col-6">
+                    <form>
+                        <div class="form-group">
+                            <label for="formControlRange2">Option B:&nbsp;<span id="value2"></span></label>
+                            <input type="range" class="form-control-range" id="formControlRange2">
+                        </div>
+                    </form>
+                </div>
+                Options total:&nbsp;<span id="opcio_sum"></span>
             </div>
-            <div class="col-6">
-                <form>
-                    <div class="form-group">
-                        <label for="formControlRange2">Option B:&nbsp;<span id="value2"></span></label>
-                        <input type="range" class="form-control-range" id="formControlRange2">
-                    </div>
-                </form>
+            <h3>Tables</h3>
+            You can easily improve the visual appearance of a table, and get a result similar to latex's result.
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">First</th>
+                        <th scope="col">Last</th>
+                        <th scope="col">Handle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th scope="row">1</th>
+                        <td>Mark</td>
+                        <td>Otto</td>
+                        <td>@mdo</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">2</th>
+                        <td>Jacob</td>
+                        <td>Thornton</td>
+                        <td>@fat</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">3</th>
+                        <td>Larry</td>
+                        <td>the Bird</td>
+                        <td>@twitter</td>
+                    </tr>
+                </tbody>
+            </table>
+            Without Bootstrap, it would look different.
+            <h3>Dismissing a box</h3>
+            This requires JS, I believe.
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>Holy guacamole!</strong> You should check in on some of those fields below.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            Options total:&nbsp;<span id="opcio_sum"></span>
-        </div>
-        <h3>Tables</h3>
-        You can easily improve the visual appearance of a table, and get a result similar to latex's result.
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">First</th>
-                    <th scope="col">Last</th>
-                    <th scope="col">Handle</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td>Larry</td>
-                    <td>the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-            </tbody>
-        </table>
-        Without Bootstrap, it would look different.
-        <h3>Dismissing a box</h3>
-        This requires JS, I believe.
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <strong>Holy guacamole!</strong> You should check in on some of those fields below.
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        Click on the x to remove this box.
+            Click on the x to remove this box.
         </p>
         <h2>jQuery</h2>
         <p>This is a simple JS file you can download from the website of <a
@@ -184,6 +185,8 @@
         </ul>
     </div>
     <script type="text/javascript" src="{{ url_for('static',filename='scripts/end_of_file_script.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='scripts/slider.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static',filename='scripts/auto_anchor.js') }}"></script>
 
 </body>
 

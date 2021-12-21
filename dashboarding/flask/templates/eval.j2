@@ -7,26 +7,81 @@
     <link href="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/css/bootstrap.css') }}" rel="stylesheet">
     <script type="text/javascript"
         src="{{ url_for('static',filename='scripts/bootstrap-4.6.0-dist/js/bootstrap.bundle.js') }}"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <script>
+        function showDataInput(nameSelect) {
+            console.log(nameSelect);
+            if (nameSelect.value == "list") {
+                document.getElementById("list").style.display = "";
+                document.getElementById("random").style.display = "none";
+                document.getElementById("file").style.display = "none";
+            } else if (nameSelect.value == "random") {
+                document.getElementById("list").style.display = "none";
+                document.getElementById("random").style.display = "";
+                document.getElementById("file").style.display = "none";
+            } else if (nameSelect.value == "file") {
+                document.getElementById("list").style.display = "none";
+                document.getElementById("random").style.display = "none";
+                document.getElementById("file").style.display = "";
+            }
+        }
+    </script>
 </head>
 
 <body class="container">
-    <p>Type in your expression to be evaluated. If it can be evaluated, then python's eval is also executed and both results are shown.</p>
+
     <form action="/evaluate" method="post">
-    <div class="form-group">
-    <label for="expression">Expresion</label>
-    <input type="text" class="form-control" id="expression" name="expression" aria-describedby="expressionHelp" placeholder="sin(2*3.14159*pow(0.01,2))">
-    <small id="expressionHelp" class="form-text text-muted">The expression you would like to evaluate. Can contain sin, pow, and the elementary operators.</small>
+        <p>Type in your expression to be evaluated. If it can be evaluated, then python's eval is also executed and both
+            results are shown.</p>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="expression">\(f(x) = \)</label>
+            </div>
+            <input type="text" class="form-control" id="expression" name="expression"
+                placeholder="sin(pow(x,2))+cos(pow(x,2))">
+        </div>
+
+        <p>The value of \(x\) can be
+            <ul>
+                <li>a single number, e.g. -9.2e3, or a list of numbers separated by comma, e.g. 1.41, 2.71, 3.14</li>
+                <li>random values in the range \(\left[ {0,1} \right)\) with a given size</li>
+                <li>A file containing a column named <code>x</code></li>
+            </ul>
+        </p>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <label class="input-group-text" for="input_val">\(\text{Value of } x\):</label>
+            </div>
+            <select class="custom-select" id="input_val" name="input_val" onchange="showDataInput(this)">
+                <option value="list" selected>Single value(s):</option>
+                <option value="random">Random values of size:</option>
+                <option value="file">File...</option>
+            </select>
+            <input type="text" id="list" class="col-4" placeholder="-9.2e3, 1.41, 2.71, 3.14">
+            <input type="text" id="random" class="col-4" placeholder="42" style="display:none">
+            <div class="custom-file col-4" id="file" style="display:none">
+                <input type="file" name="file" class="custom-file-input" id="fileValueField">
+                <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                <label class="custom-file-label" for="customFile">Choose file</label>
+            </div>
+            <div class="input-group-append">
+                <input type="submit" class="btn btn-primary" type="button" value="Calculate!">
+            </div>
+        </div>
     </form>
     {% if ret is not none %}
-    <hr/>
+    <hr />
     {% if ret[0] %}<div class="alert alert-success" role="alert">
-    {% else %}<div class="alert alert-warning" role="alert">
-    {% endif %}
-    {{ ret[1]|safe }}</div>
-    {% endif %}
-    <hr/>
-    {{ marked_up|safe }}
+        {% else %}<div class="alert alert-warning" role="alert">
+            {% endif %}
+            {{ ret[1]|safe }}</div>
+        {% endif %}
+        <hr />
+        {{ marked_up|safe }}
+        <script type="text/javascript" src="{{ url_for('static',filename='scripts/end_of_file_script.js') }}"></script>
 </body>
 
 </html>
