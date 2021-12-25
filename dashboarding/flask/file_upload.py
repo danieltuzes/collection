@@ -15,6 +15,7 @@ from math import sin, cos  # pylint: disable=unused-import
 from pathlib import Path
 from time import sleep
 from datetime import datetime
+import hashlib
 import inspect
 from typing import Tuple, Callable
 import matplotlib.pyplot as plt
@@ -24,7 +25,7 @@ import markdown
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
-from ebnf_full import consume_expr
+import single_arg as sa
 
 # user defined settings go here
 from settings import *  # pylint: disable=wildcard-import
@@ -470,27 +471,67 @@ def random():
 def evaluate():
     """Evaluate an expression."""
     expr = request.form.get('expression')
+    list_vals = request.form.get('list')
+    randomsize = request.form.get('random')
+
+    uploaded_file = request.form.get('file')
+    data = numpy.array([numpy.nan])
+
     ret = None
+    fname = None
+
     if expr is not None:
+
+        if randomsize is not None and randomsize != "":
+            data = numpy.random.random(size=min(int(randomsize), 1e8))
+        elif list_vals is not None:
+            data = numpy.fromstring(list_vals, dtype=float, sep=",")
+
+        summary = f"- The first few input data were:\n\n```txt\n{data[:5]}\n```\n\n"
         try:
-            res = consume_expr(expr, 0)[0]
+            res = sa.consume_expr(expr, data, "x")[0]
             success = True
         except ValueError as error:
-            res = ("It is not a valid expression "
-                   f" and the interpreter was prepared for this: {error}")
+            res = f"The interpreter was prepared for this type of error: {error}"
             success = False
         except Exception as error:  # pylint: disable = broad-except
-            res = (f"It is not a valid expression: {error}")
+            res = f"The interpreter says: {error}"
             success = False
-        summary = (f"The input value\n> `{expr}`\n\nwas provided, "
-                   f"and the return value is\n> {res}")
+
+        if expr == "":
+            summary += "- The input function was an empty string.\n"
+        else:
+            summary += f"- The input function was:\n\n```python\n{expr}\n```\n\n"
+
         if success:
-            summary += ("\n\nUsing python's `eval`, the return values is\n"
-                        f"> {eval(expr)}")  # pylint: disable = eval-used
-        ret = [success, markdown.markdown(summary)]
+            summary += ("- The interpreter successfully processed the data "
+                        "and the first few return values are\n\n"
+                        f"```python\n{res[:5]}\n```\n\n")
+            expr = str.replace(expr, "x", "data")
+            for func_1 in sa.FUNC_S:
+                expr = expr.replace(func_1, "numpy." + func_1)
+            eval_res = eval(expr)  # pylint: disable = eval-used
+
+            summary += ("- Using python's `eval`, the first few return values are\n\n"
+                        f"```python\n{eval_res[:5]}\n```\n")
+            filecontent = pandas.DataFrame(data={"x": data, "f(x)": res})
+            myhash = hashlib.blake2b(digest_size=4)
+            myhash.update(res[:5].tobytes())
+            fname = myhash.hexdigest() + ".csv"
+            filecontent.to_csv(os.path.join(app.config['UPLOAD_PATH'], fname))
+        else:
+            summary += f"- This is an invalid expression. {res}"
+
+        ret = [success,
+               markdown.markdown(summary, extensions=['fenced_code',
+                                                      'codehilite']),
+               fname]
+
     with open("../calc/README.md", "r", encoding="utf-8") as ifile:
         readme = ifile.read()
         marked_up = markdown.markdown(readme, extensions=['fenced_code',
                                                           'codehilite',
                                                           'tables'])
-    return render_template("eval.j2", ret=ret, marked_up=marked_up)
+    return render_template("eval.j2",
+                           ret=ret,
+                           marked_up=marked_up)

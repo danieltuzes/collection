@@ -19,7 +19,7 @@ The results would be shown to the users, as well as a short analysis on the perf
 
 The program will be able to accept two mandatory inputs:
 
-- an expression to be calculated, e.g. $$f(x,y) = sin(x \cdot y) + 0.2 \cdot \operatorname{pow}(y,2)$$
+- an expression to be calculated, e.g. $$f(x,y) = \sin(x \cdot y) + 0.2 \cdot \operatorname{pow}(y,2)$$
 - A csv file including the variables as column headers and (the index column is optional)
 
 | index |   x    |    y    |

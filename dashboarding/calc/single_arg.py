@@ -17,8 +17,9 @@ import numpy as np
 Value = Union[float, int, np.ndarray]
 
 DIGITS = "0123456789"
-FUNC_1 = ["", "sin", "cos", "tan", "arcsin",
+FUNC_S = ["sin", "cos", "tan", "arcsin",
           "arccos", "arctan", "sinh", "cosh", "arctanh"]
+FUNC_1 = ["", *FUNC_S]
 FUNC_2 = ["pow"]
 PARENT = 0
 
