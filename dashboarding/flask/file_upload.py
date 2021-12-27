@@ -17,21 +17,23 @@ from time import sleep
 from datetime import datetime
 import hashlib
 import inspect
-from typing import Tuple, Callable
+from typing import Tuple
 import matplotlib.pyplot as plt
 import numpy
 import pandas
 import markdown
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 import single_arg as sa
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+
 
 # user defined settings go here
 from settings import *  # pylint: disable=wildcard-import
 
 LIMITS = {"file_size": MAX_CONTENT_LENGTH,
-          "folder_size": FOLDER_SIZE_LIMIT, "file_count": FILE_COUNT_LIMIT}
+          "folder_size": FOLDER_SIZE_LIMIT,
+          "file_count": FILE_COUNT_LIMIT}
 
 
 def get_size(folder_to_check):
@@ -470,68 +472,113 @@ def random():
 @app.route("/evaluate", methods=['GET', 'POST'])
 def evaluate():
     """Evaluate an expression."""
-    expr = request.form.get('expression')
-    list_vals = request.form.get('list')
-    randomsize = request.form.get('random')
+    data, expr, summary = get_form_data()
+    if data is None or expr is None:  # no input value is provided
+        if summary is None:
+            return render_template("eval.j2",
+                                   ret=None,
+                                   MD=as_md("../calc/README.md"))
 
-    uploaded_file = request.form.get('file')
-    data = numpy.array([numpy.nan])
+        success = False
+        return render_template("eval.j2",
+                               ret=[success, summary],
+                               MD=as_md("../calc/README.md"))
 
-    ret = None
-    fname = None
+    summary = f"- The first few input data were:\n\n```txt\n{data[:5]}\n```\n\n"
 
-    if expr is not None:
+    if expr != "":
+        summary = f"- The input function was:\n\n```python\n{expr}\n```\n\n"
 
-        if randomsize is not None and randomsize != "":
-            data = numpy.random.random(size=min(int(randomsize), 1e8))
-        elif list_vals is not None:
-            data = numpy.fromstring(list_vals, dtype=float, sep=",")
-
-        summary = f"- The first few input data were:\n\n```txt\n{data[:5]}\n```\n\n"
         try:
             res = sa.consume_expr(expr, data, "x")[0]
-            success = True
+            expr_intped = True
         except ValueError as error:
             res = f"The interpreter was prepared for this type of error: {error}"
-            success = False
+            expr_intped = False
         except Exception as error:  # pylint: disable = broad-except
             res = f"The interpreter says: {error}"
-            success = False
 
-        if expr == "":
-            summary += "- The input function was an empty string.\n"
-        else:
-            summary += f"- The input function was:\n\n```python\n{expr}\n```\n\n"
-
-        if success:
-            summary += ("- The interpreter successfully processed the data "
-                        "and the first few return values are\n\n"
-                        f"```python\n{res[:5]}\n```\n\n")
+        if expr_intped:
+            summary += "- The interpreter successfully processed the data "
+            if isinstance(res, numpy.ndarray):
+                summary += ("and the first few return values are\n\n"
+                            f"```python\n{res[:5]}\n```\n\n")
+            else:
+                summary += (f"and return value is a constant `{res}`\n\n")
+                res = numpy.full_like(data, res)
             expr = str.replace(expr, "x", "data")
             for func_1 in sa.FUNC_S:
                 expr = expr.replace(func_1, "numpy." + func_1)
             eval_res = eval(expr)  # pylint: disable = eval-used
 
-            summary += ("- Using python's `eval`, the first few return values are\n\n"
-                        f"```python\n{eval_res[:5]}\n```\n")
-            filecontent = pandas.DataFrame(data={"x": data, "f(x)": res})
+            if isinstance(eval_res, numpy.ndarray):
+                summary += ("- Using python's `eval`, the first few return values are\n\n"
+                            f"```python\n{eval_res[:5]}\n```\n")
+            else:
+                summary += ("- Using python's `eval`, the return value is a constant "
+                            f"`{eval_res}`\n\n")
+            filecontent = pandas.DataFrame(data={"x": data.tolist(),
+                                                 "f(x)": res.tolist()})
             myhash = hashlib.blake2b(digest_size=4)
             myhash.update(res[:5].tobytes())
             fname = myhash.hexdigest() + ".csv"
             filecontent.to_csv(os.path.join(app.config['UPLOAD_PATH'], fname))
-        else:
-            summary += f"- This is an invalid expression. {res}"
+            ret = [expr_intped,
+                   markdown.markdown(summary, extensions=['fenced_code',
+                                                          'codehilite']),
+                   fname]
+    else:
+        summary = "Input function is missing."
+        success = False
+        ret = [success, summary]
 
-        ret = [success,
-               markdown.markdown(summary, extensions=['fenced_code',
-                                                      'codehilite']),
-               fname]
-
-    with open("../calc/README.md", "r", encoding="utf-8") as ifile:
-        readme = ifile.read()
-        marked_up = markdown.markdown(readme, extensions=['fenced_code',
-                                                          'codehilite',
-                                                          'tables'])
     return render_template("eval.j2",
                            ret=ret,
-                           marked_up=marked_up)
+                           MD=as_md("../calc/README.md"))
+
+
+def as_md(fname: str) -> str:
+    """Return fname as MD code."""
+    with open(fname, "r", encoding="utf-8") as ifile:
+        readme_text = ifile.read()
+        readme_md = markdown.markdown(readme_text, extensions=['fenced_code',
+                                                               'codehilite',
+                                                               'tables'])
+    return readme_md
+
+
+def get_form_data() -> Tuple[numpy.ndarray, str, str]:
+    """Get data, expr and summary for the evaluate page."""
+    summary = None
+    try:
+        expr = request.form.get('expression')
+        list_vals = request.form.get('list')
+        randomsize = request.form.get('random')
+        uploaded_file = len(request.files)
+    except RequestEntityTooLarge:
+        summary = "The uploaded file was too large."
+        data = None
+        expr = None
+        return data, expr, summary
+
+    if not (list_vals or randomsize or uploaded_file):  # not input vals
+        data = None
+        expr = None
+        return data, expr, summary
+
+    if uploaded_file and request.files["file"].filename != "":
+        try:
+            data_table = pandas.read_csv(request.files["file"], usecols=["x"])
+            data = data_table.to_numpy().flatten()
+        except Exception as err:  # pylint: disable = broad-except
+            summary = ("Couldn't read column x from the file "
+                       f"{request.files['file'].filename}: {err}")
+            data = None
+            expr = None
+            return data, expr, summary
+    elif randomsize is not None and randomsize != "":
+        data = numpy.random.random(size=min(int(randomsize), 1e8))
+    elif list_vals is not None:
+        data = numpy.fromstring(list_vals, dtype=float, sep=",")
+
+    return data, expr, summary
