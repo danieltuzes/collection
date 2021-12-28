@@ -19,12 +19,13 @@ import hashlib
 import inspect
 from typing import Tuple
 import matplotlib.pyplot as plt
+import re
 import numpy
 import pandas
 import markdown
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
-import single_arg as sa
+import multi_arg as ma
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 
 
@@ -484,13 +485,14 @@ def evaluate():
                                ret=[success, summary],
                                MD=as_md("../calc/README.md"))
 
-    summary = f"- The first few input data were:\n\n```txt\n{data[:5]}\n```\n\n"
+    summary = ("- The first few input data were:\n\n"
+               f"```txt\n{[*data.values()][0][:5]}\n```\n\n")
 
     if expr != "":
-        summary = f"- The input function was:\n\n```python\n{expr}\n```\n\n"
+        summary += f"- The input function was:\n\n```python\n{expr}\n```\n\n"
 
         try:
-            res = sa.consume_expr(expr, data, "x")[0]
+            res = ma.consume_expr(expr, data)[0]
             expr_intped = True
         except ValueError as error:
             res = f"The interpreter was prepared for this type of error: {error}"
@@ -499,30 +501,23 @@ def evaluate():
             res = f"The interpreter says: {error}"
 
         if expr_intped:
+            expr_eval = expr
             summary += "- The interpreter successfully processed the data "
             if isinstance(res, numpy.ndarray):
                 summary += ("and the first few return values are\n\n"
                             f"```python\n{res[:5]}\n```\n\n")
             else:
                 summary += (f"and return value is a constant `{res}`\n\n")
-                res = numpy.full_like(data, res)
-            expr = str.replace(expr, "x", "data")
-            for func_1 in sa.FUNC_S:
-                expr = expr.replace(func_1, "numpy." + func_1)
-            eval_res = eval(expr)  # pylint: disable = eval-used
+                res = numpy.full([*data.values()][0].shape, res)
 
-            if isinstance(eval_res, numpy.ndarray):
-                summary += ("- Using python's `eval`, the first few return values are\n\n"
-                            f"```python\n{eval_res[:5]}\n```\n")
-            else:
-                summary += ("- Using python's `eval`, the return value is a constant "
-                            f"`{eval_res}`\n\n")
-            filecontent = pandas.DataFrame(data={"x": data.tolist(),
-                                                 "f(x)": res.tolist()})
-            myhash = hashlib.blake2b(digest_size=4)
-            myhash.update(res[:5].tobytes())
-            fname = myhash.hexdigest() + ".csv"
-            filecontent.to_csv(os.path.join(app.config['UPLOAD_PATH'], fname))
+            re_search = r"(" + "|".join([*data.keys()]) + ")"
+            expr_eval = re.sub(re_search, r"data['\1']", expr)
+            for func_1 in ma.FUNC_S:
+                expr_eval = expr_eval.replace(func_1, "numpy." + func_1)
+            eval_res = eval(expr_eval)  # pylint: disable = eval-used
+            summary += compare_with_py_eval(res, eval_res)
+
+            fname = create_eval_ret_file(data, expr, res)
             ret = [expr_intped,
                    markdown.markdown(summary, extensions=['fenced_code',
                                                           'codehilite']),
@@ -547,7 +542,7 @@ def as_md(fname: str) -> str:
     return readme_md
 
 
-def get_form_data() -> Tuple[numpy.ndarray, str, str]:
+def get_form_data() -> Tuple[dict[str, numpy.ndarray], str, str]:
     """Get data, expr and summary for the evaluate page."""
     summary = None
     try:
@@ -568,8 +563,12 @@ def get_form_data() -> Tuple[numpy.ndarray, str, str]:
 
     if uploaded_file and request.files["file"].filename != "":
         try:
-            data_table = pandas.read_csv(request.files["file"], usecols=["x"])
-            data = data_table.to_numpy().flatten()
+            data_table = pandas.read_csv(request.files["file"],
+                                         index_col=False)
+            col_names = data_table.columns.tolist()
+            data = {}
+            for col_name in col_names:
+                data[col_name] = data_table[col_name].to_numpy()
         except Exception as err:  # pylint: disable = broad-except
             summary = ("Couldn't read column x from the file "
                        f"{request.files['file'].filename}: {err}")
@@ -577,8 +576,39 @@ def get_form_data() -> Tuple[numpy.ndarray, str, str]:
             expr = None
             return data, expr, summary
     elif randomsize is not None and randomsize != "":
-        data = numpy.random.random(size=min(int(randomsize), 1e8))
+        data = {"x": numpy.random.random(size=min(int(randomsize), 1e8))}
     elif list_vals is not None:
-        data = numpy.fromstring(list_vals, dtype=float, sep=",")
+        data = {"x": numpy.fromstring(list_vals, dtype=float, sep=",")}
 
     return data, expr, summary
+
+
+def create_eval_ret_file(data, expr, res) -> str:
+    """Steps to create output file from res."""
+    filecontent = pandas.DataFrame(data=data)
+    filecontent["f="+expr] = res
+    myhash = hashlib.blake2b(digest_size=4)
+    myhash.update(res[:5].tobytes())
+    fname = myhash.hexdigest() + ".csv"
+    filecontent.to_csv(os.path.join(
+        app.config['UPLOAD_PATH'], fname), index=False)
+
+    return fname
+
+
+def compare_with_py_eval(res, eval_res) -> str:
+    """Compare res with python's eval and add the conclusion to the return"""
+    summary = ""
+    if isinstance(eval_res, numpy.ndarray):
+        summary += ("- Using python's `eval`, the sum of the "
+                    "difference on the first 5 elements is ")
+        sum_diff = numpy.sum(eval_res[:5]-res[:5])
+        if sum_diff == 0:
+            summary += "exactly 0"
+        else:
+            summary += f"{sum_diff}"
+    else:
+        summary += ("- Using python's `eval`, the return value is a constant "
+                    f"`{eval_res}`\n\n")
+
+    return summary

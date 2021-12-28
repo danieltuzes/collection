@@ -1,4 +1,4 @@
-"""Apply a single argument function on a numpy array.
+"""Apply a multiple argument function on a numpy array.
 
 The array is a numpy ndarray of random values in [0,1), denoted by x,
 and the function definition has to be given. As an example,
@@ -75,8 +75,7 @@ def consume_frac(seq: str, pos: int) -> Tuple[float, int]:
 
 
 def consume_expr(seq: str,
-                 arr: np.ndarray,
-                 var_name: str,
+                 arr: dict[str, np.ndarray],
                  pos: int = 0,
                  until: str = "") -> Tuple[Value, int]:
     """Consume a single value starting from pos."""
@@ -84,14 +83,14 @@ def consume_expr(seq: str,
     ops = {1: [], 2: [], 3: [], 4: []}  # +, -, * and /
     i: int = 0  # number of operators within ops
 
-    value, pos = consume_value(seq, arr, var_name, pos)
+    value, pos = consume_value(seq, arr, pos)
     values.append(value)
 
     while pos < len(seq) and (not until or (seq[pos] != until)):
         operator, pos = consume_op(seq, pos)
         ops[operator].append(i)
         i += 1
-        value, pos = consume_value(seq, arr, var_name, pos)
+        value, pos = consume_value(seq, arr, pos)
         values.append(value)
 
     # elementary operators can be applied on vectors the same way as on scalars
@@ -121,8 +120,7 @@ def consume_expr(seq: str,
 
 
 def consume_value(seq: str,
-                  arr: np.ndarray,
-                  var_name: str,
+                  arr: dict[str, np.ndarray],
                   pos: int) -> Tuple[Value, int]:
     """Reads in a function or number values."""
     start = pos
@@ -130,21 +128,21 @@ def consume_value(seq: str,
         pos += 1
     if pos > start or seq[start] == "(":
         func_name = seq[start:pos]
-        if func_name == var_name:
-            value = arr
+        if func_name in arr:
+            value = arr[func_name]
         else:
             pos = consume_parent(seq, pos)
             if func_name in FUNC_1:
-                num, pos = consume_expr(seq, arr, var_name, pos, ")")
+                num, pos = consume_expr(seq, arr, pos, ")")
                 pos = consume_parent(seq, pos)
                 if func_name == "":
                     value = num
                 else:
                     value = s_op(func_name, num)
             elif func_name in FUNC_2:
-                num_1, pos = consume_expr(seq, arr, var_name, pos, ",")
+                num_1, pos = consume_expr(seq, arr, pos, ",")
                 pos = consume_comma(seq, pos)
-                num_2, pos = consume_expr(seq, arr, var_name, pos, ")")
+                num_2, pos = consume_expr(seq, arr, pos, ")")
                 pos = consume_parent(seq, pos)
                 if func_name == "pow":  # pow is good for arrays too
                     value = num_1 ** num_2
@@ -219,13 +217,15 @@ def consume_op(seq: str, pos: int) -> Tuple[int, int]:
 
 
 if __name__ == "__main__":
-    data = np.array([0, 0.1, 0.2, 0.5, 1, 2, 5])
-    print("Apply a function on the data x:")
+    test_data = {"x": np.array([10, 9, 8, 7, 6]),
+                 "y": np.array([1.e-01, 2.e-01, 3.e-01, 4.e-01, 5.e-01]),
+                 "z": np.array([1.e-06, 1.e-05, 1.e-04, 1.e-03, 1.e-02])}
+    print("Apply a function on the data x, y and z:")
     while True:
         my_text = input()
 
         try:
-            print(consume_expr(my_text, data, "x", 0)[0])
+            print(consume_expr(my_text, test_data, 0)[0])
         except ValueError as error:
             print(f"It is not a valid expression: {error}")
         except Exception as error:  # pylint: disable = broad-except

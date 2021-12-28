@@ -5,15 +5,8 @@
   - [How the code works](#how-the-code-works)
   - [Code development](#code-development)
 
-The aim is to create a webapp the can perform operations on the uploaded data in 5 different ways:
-
-1. By calling numpy's vectorized (?) functions such as `array_for`, `array_map`, `fromiter` an `vectorize`
-2. Doing similarly with pandas
-3. Invoking Numba
-4. call the already vectorized numpy functions after interpreting the operation
-5. create a python module in cpp, and call that
-
-The results would be shown to the users, as well as a short analysis on the performance.
+The aim is to create a webapp the can perform operations on the uploaded data,
+and shows the result to the user..
 
 ## How to use
 
@@ -29,11 +22,15 @@ The program will be able to accept two mandatory inputs:
 |   3   | 0.8892 | 0.21222 |
 |   4   | 0.2321 |  0.21   |
 
-The return values are printed into a csv file and offered the user to download, but the main information is the calculation time.
+The return values are printed into a csv file and offered the user to download.
 
 ## How the code works
 
-As step, the syntax of the expression one can input has to be analyzed. It is similar the python's eval function with the difference is that I did it and have more control what happens inside. The syntax is then translated to numpy
+The input data is analyzed, and the column headers as variables are identified.
+
+Then the syntax of the expression has to be analyzed. It is similar the python's eval function with the difference
+that I wrote it myself therefore I have more control what happens inside. The syntax is then translated to numpy's
+vectorized operations.
 
 ## Code development
 
@@ -62,3 +59,10 @@ expr   ⇐ ( number | ( saopn "(" expr ")" ) | ( taopn "(" expr , expr ")" ) ) {
 ```
 
 In this last example, the unquoted parenthesis represent grouping, and quoted parenthesis represent the parenthesis character.
+
+Then I added the ability to handle a single variable (containing an numpy array of values),
+then the ability to handle multiple variables.
+I also created the webapp in parallel.
+
+In the end I realized that there are [many aspects of efficiency](https://stackoverflow.com/questions/35215161/most-efficient-way-to-map-function-over-numpy-array), and it is better to dig deeper into this topic
+once the specific problem arises.
