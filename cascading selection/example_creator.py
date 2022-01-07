@@ -32,12 +32,11 @@ def create_selector():
     """Create the file of selection rules and assigned values."""
     sel_r_data = {"visitor": True,
                   "hall": "base",
-                  "buffet": np.random.choice(["1st", "2nd", "3rd"], 10)}
+                  "buffet": np.random.choice(["1st", "2nd", "3rd"], 12)}
     columns = [*p_data, "hall", "buffet"]
     sel_r = pd.DataFrame(data=sel_r_data, columns=[*columns])
 
-    sel_r.loc[0, ["visitor", "buffet", "hall"]] = (pd.NA, "street", pd.NA)
-    sel_r.loc[1, "hall"] = "base"
+    sel_r.loc[0, ["visitor", "hall", "buffet"]] = (pd.NA, pd.NA, "street")
 
     sel_r.loc[2, ["fav color", "hall"]] = ["red", "prim"]
     sel_r.loc[3, ["fav color", "hall"]] = ["green", "prim"]
@@ -56,6 +55,7 @@ def create_selector():
     sel_r.loc[8, ["PID", "hall"]] = [0, "VIP"]
     sel_r.loc[9, ["PID", "hall"]] = [1, "VIP"]
     sel_r.loc[10, ["PID", "hall"]] = [42, "VIP"]
+    sel_r.loc[11, ["fav color", "hall", "buffet"]] = ["red", "surprise", "0th"]
 
     sel_r.to_csv("selection_rules.csv", index=False)
 

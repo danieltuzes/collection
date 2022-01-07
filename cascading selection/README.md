@@ -65,6 +65,7 @@ shown below (the leftmost column is not part of the file):
 | 8   |    0 |             |            |           | True    | VIP      | 2nd    |
 | 9   |    1 |             |            |           | True    | VIP      | 1st    |
 | 10  |   42 |             |            |           | True    | VIP      | 2nd    |
+| 11  |      |             |            | red       | True    | surprise | 0th    |
 
 The first 5 columns can be found in `people.csv` too, these are called the
 properties based on which selection rules are applied.
@@ -101,6 +102,10 @@ eat in buffet "3rd".
 
 Line 8, 9 and 10 tell that these people (if they are visitors), will be in the hall
 "VIP", and will eat in different buffets.
+
+Line 11th is a collision with line 2:
+they specify the same users and assign different property.
+In this case, a warning log is thrown and the first rule is applied.
 
 The first few lines of the results are shown in the table below.
 

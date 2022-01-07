@@ -2,7 +2,10 @@
 
 from typing import List
 import argparse
+import logging
 import pandas as pd
+
+__version__ = "1.0.0"
 
 
 def cascading_assignment(data: pd.DataFrame,
@@ -32,6 +35,17 @@ def cascading_assignment(data: pd.DataFrame,
         The data together with the newly assigned properties.
         Keeps the order of entries (aka stable).
     """
+    # check if rules are non-colliding and make them unique
+    if sel_r[[*priority]].duplicated().any():
+        logging.error("Selection rule collision: two or more rules "
+                      "set the properties for the same set of "
+                      "property values. The first rule(s) are kept."
+                      "Colliding rule e.g.:\n%s\nvs\n%s",
+                      sel_r[sel_r.duplicated(subset=[*priority],
+                                             keep=False)].iloc[[0], :],
+                      sel_r[sel_r.duplicated(subset=[*priority])].iloc[[0], :])
+        sel_r.drop_duplicates(subset=[*priority], inplace=True)
+
     # identify the column names containing the values needed to be assigned
     val_n = sel_r.columns.to_list()
     for item in priority:
@@ -109,6 +123,7 @@ if __name__ == "__main__":
     dat.index.name = "df index"  # it must not be None
     dat.add_prefix("_")  # add prefix so name collision can be precented
     sel_rule = pd.read_csv(args.sel_prop_fname)
+    sel_rule.index.name = "line num"
     priori = sel_rule.columns[:args.nof_sel_col]
 
     result = cascading_assignment(dat, sel_rule, priori)
