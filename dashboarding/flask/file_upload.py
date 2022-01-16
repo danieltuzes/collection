@@ -473,17 +473,25 @@ def random():
 @app.route("/evaluate", methods=['GET', 'POST'])
 def evaluate():
     """Evaluate an expression."""
+    source_code = "\n``` python\n" + inspect.getsource(ma)+"\n```\n"
+    source_code_as_html = markdown.markdown(source_code,
+                                            extensions=['fenced_code',
+                                                        'codehilite'])
+    MD = [as_html("../calc/intro.md"),
+          as_html("../calc/README.md"),
+          source_code_as_html]
+
     data, expr, summary = get_form_data()
     if data is None or expr is None:  # no input value is provided
         if summary is None:
             return render_template("eval.j2",
                                    ret=None,
-                                   MD=as_md("../calc/README.md"))
+                                   MD=MD)
 
         success = False
         return render_template("eval.j2",
                                ret=[success, summary],
-                               MD=as_md("../calc/README.md"))
+                               MD=MD)
 
     summary = ("- The first few input data were:\n\n"
                f"```txt\n{[*data.values()][0][:5]}\n```\n\n")
@@ -517,29 +525,37 @@ def evaluate():
             eval_res = eval(expr_eval)  # pylint: disable = eval-used
             summary += compare_with_py_eval(res, eval_res)
 
-            fname = create_eval_ret_file(data, expr, res)
+            fname, table_html = wrap_data(data, expr, res)
             ret = [expr_intped,
                    markdown.markdown(summary, extensions=['fenced_code',
                                                           'codehilite']),
-                   fname]
+                   fname,
+                   table_html]
     else:
         summary = "Input function is missing."
         success = False
         ret = [success, summary]
 
     return render_template("eval.j2",
-                           ret=ret,
-                           MD=as_md("../calc/README.md"))
+                           MD=MD,
+                           ret=ret)
 
 
-def as_md(fname: str) -> str:
+def as_html(fname: str) -> str:
     """Return fname as MD code."""
     with open(fname, "r", encoding="utf-8") as ifile:
-        readme_text = ifile.read()
-        readme_md = markdown.markdown(readme_text, extensions=['fenced_code',
-                                                               'codehilite',
-                                                               'tables'])
-    return readme_md
+        raw_text = ifile.read()
+        md_repr = markdown.markdown(raw_text,
+                                    extensions=['fenced_code',
+                                                'codehilite',
+                                                'tables',
+                                                'toc'],
+                                    extension_configs={
+                                        'toc': {'toc_depth': "2-6",
+                                                "marker": "<!--TOC-->"},
+                                        'mdx_math': {'enable_dollar_delimiter': True}},
+                                    tab_length=2)
+    return md_repr
 
 
 def get_form_data() -> Tuple[dict[str, numpy.ndarray], str, str]:
@@ -583,17 +599,24 @@ def get_form_data() -> Tuple[dict[str, numpy.ndarray], str, str]:
     return data, expr, summary
 
 
-def create_eval_ret_file(data, expr, res) -> str:
+def wrap_data(data, expr, res) -> Tuple[str, str]:
     """Steps to create output file from res."""
-    filecontent = pandas.DataFrame(data=data)
-    filecontent["f="+expr] = res
+    data = pandas.DataFrame(data=data)
+    data["f="+expr] = res
     myhash = hashlib.blake2b(digest_size=4)
     myhash.update(res[:5].tobytes())
     fname = myhash.hexdigest() + ".csv"
-    filecontent.to_csv(os.path.join(
+    data.to_csv(os.path.join(
         app.config['UPLOAD_PATH'], fname), index=False)
-
-    return fname
+    table_html = data.to_html(max_rows=10,
+                              classes=["table",
+                                       "table-dark",
+                                       "table-hover",
+                                       "table-sm",
+                                       "w-auto"],
+                              border=0,
+                              justify=None)
+    return fname, table_html
 
 
 def compare_with_py_eval(res, eval_res) -> str:
