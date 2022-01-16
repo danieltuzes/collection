@@ -1,19 +1,26 @@
-# Calculator
+# The calculator python project
 
-- [Calculator](#calculator)
+A python example with a HTML interface on how to process strings representing an operation.
+
+- [The calculator python project](#the-calculator-python-project)
   - [How to use](#how-to-use)
   - [How the code works](#how-the-code-works)
   - [Code development](#code-development)
 
-The aim is to create a webapp the can perform operations on the uploaded data,
-and shows the result to the user..
+The aim is to create a webapp the can perform operations on data provided by the user,
+and shows the result to the user and offer it for downloading.
 
 ## How to use
 
-The program will be able to accept two mandatory inputs:
+The program is be able to accept two mandatory inputs:
 
-- an expression to be calculated, e.g. $$f(x,y) = \sin(x \cdot y) + 0.2 \cdot \operatorname{pow}(y,2)$$
-- A csv file including the variables as column headers and (the index column is optional)
+1. an expression to be calculated, e.g.
+   1. a $\mathbb{R} \to \mathbb{R}$ function, such as $f(x) = x^2$
+   2. an ${\mathbb{R}^N} \to \mathbb{R}$ function, e.g.  using $N=2$: $f(x,y) = \sin(x \cdot y) + 0.2 \cdot \operatorname{pow}(y,2)$
+2. Input data, provided as
+   1. list of individual values
+   2. a given number of random values in the range $\left[ {0,1} \right)$
+   3. a csv file including the variables as column headers (the index column is optional)
 
 | index |   x    |    y    |
 | :---: | :----: | :-----: |
@@ -22,7 +29,9 @@ The program will be able to accept two mandatory inputs:
 |   3   | 0.8892 | 0.21222 |
 |   4   | 0.2321 |  0.21   |
 
-The return values are printed into a csv file and offered the user to download.
+The input values are put into a pandas table structure, the function is evaluated on the columns and the result is appended to the table.
+The first few lines of this table are shown to the user,
+and the full table is offered for download.
 
 ## How the code works
 
@@ -66,3 +75,5 @@ I also created the webapp in parallel.
 
 In the end I realized that there are [many aspects of efficiency](https://stackoverflow.com/questions/35215161/most-efficient-way-to-map-function-over-numpy-array), and it is better to dig deeper into this topic
 once the specific problem arises.
+
+Content of the source file:
