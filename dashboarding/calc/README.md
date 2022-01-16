@@ -43,19 +43,19 @@ An EBNF definition of a nested expression is deduced as the followings.
 A number is defined using EBNF as:
 
 ```EBNF
-digit  ⇐ 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-uint   ⇐ digit {digit}
-int    ⇐ [+|-] uint
-number ⇐ int [.uint] [e|E int]
+digit  = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
+uint   = digit {digit};
+int    = ["+"|"-"] uint;
+number = int ["." uint] ["e"|"E" int];
 ```
 
 Without defining functions, we define expressions. It starts with either a number or a function (single or two arguments) name, and then may come an elementary operator, followed by another expression.
 
 ```EBNF
-saopn  ⇐ | sin | cos | tan | arcsin | arccos | arctan | sinh | cosh | arctanh
-taopn  ⇐ pow
-eop    ⇐ + | - | * | /
-expr   ⇐ ( number | ( saopn "(" expr ")" ) | ( taopn "(" expr , expr ")" ) ) { eop expr }
+saopn  = | "sin" | "cos" | "tan" | "arcsin" | "arccos" | "arctan" | "sinh" | "cosh" | "arctanh";
+taopn  = "pow";
+eop    = "+" | "-" | "*" | "/";
+expr   = ( number | ( saopn "(" expr ")" ) | ( taopn "(" expr , expr ")" ) ) { eop expr };
 ```
 
 In this last example, the unquoted parenthesis represent grouping, and quoted parenthesis represent the parenthesis character.
