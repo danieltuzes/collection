@@ -1,4 +1,20 @@
-"""Notify users if they use a lot of space."""
+"""Notify users if they use a lot of space.
+
+The list of users must be stored in file
+defined by the filename stored as the keys of
+SERVER_CONF. The file must contain the users and
+disk usage as 
+
+```html
+<html>
+username1	87
+username2	11
+</html>
+```
+
+where the 1st column is the username, from which the e-mail address can be
+deduced, and the 2nd column is the used disk space in KB.
+"""
 
 import sys
 import smtplib
@@ -8,6 +24,11 @@ from typing import Dict, Tuple
 # region settings
 TB_3_5 = 3.5 * 1024 * 1024 * 1024
 
+# the key is the filename where the disk usage is stored
+# the value is tuple, whose 0th element is the server name,
+# the 1st element is where further information can be obtained, e.g. the
+# server's dashboard address, and the 2nd element is the total
+# space of the server
 SERVER_CONF = {"disk_usage1.html": ("first", "http://first:5000", TB_3_5),
                "disk_usage2.html": ("second", "http://second:5000", TB_3_5)}
 
