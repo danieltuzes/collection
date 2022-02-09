@@ -106,8 +106,8 @@ def notify(piv_user: str,
             smtp_obj = smtplib.SMTP('localhost')
             smtp_obj.send_message(email_text)
             print("Successfully sent email")
-        except smtplib.SMTPException:
-            print("Error: unable to send email")
+        except smtplib.SMTPException as err:
+            print(f"Error: unable to send email. Error message: {err}")
     if "console" in METHOD:
         print(email_text)
 
