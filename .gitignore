@@ -71,3 +71,7 @@
 # settings
 settings.py
 SO/so_notifier/last_questions.txt
+
+# compiled document
+**/docs/build/*
+**/docs/source/_build/*
