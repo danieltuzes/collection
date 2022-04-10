@@ -1,0 +1,129 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{ulem}
+\let\mathbf\bm
+
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[magyar]{babel}
+\usepackage{lmodern}
+
+\usepackage{placeins}
+\usepackage{subcaption}
+\usepackage{epstopdf}
+\usepackage{xcolor}
+\usepackage[hidelinks,unicode]{hyperref}
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
+\usepackage{cleveref}
+
+\usepackage{tocloft}
+\makeatletter
+\@addtoreset{section}{part}
+\makeatother
+
+
+\begin{document}
+\title{Gyakorló feladatok valószínűségszámításból és programozásból}
+\author{Tüzes Dániel}
+\maketitle
+\tableofcontents
+
+\part{Feladatok}
+
+\section{Lépj bele a mezőbe!}
+Társasjátékot játszunk és a 0. mezőből indulsz. Annyit léphetsz előre, amekkorát egy szabályos, hatoldalú dobókockával dobsz.
+
+\begin{itemize}
+  \item Számold ki, hogy mekkora a valószínűsége, hogy
+        \begin{enumerate}
+          \item az 1. mezőbe lépsz,
+          \item a 2. mezőbe lépsz,
+          \item a 7. mezőbe lépsz,
+          \item az $N$-edik mezőbe lépsz, határértékben!
+        \end{enumerate}
+  \item Írj egy programot, ami szimulációval, numerikusan becsüli annak a valószínűségét, hogy az $N$-edik mezőbe belelépsz! Játsszon a program 10, 100, \ldots stb.\ játszmát, és adja meg a relatív gyakoriságát, hogy egy kívánt tetszőleges mezőbe beleléptünk! Írja ki a relatív gyakoriságon felül annak becsült hibáját is!
+\end{itemize}
+
+\section{A MÁV és Murphy}
+\textit{Györgyi Géza javaslatára}
+
+Észrevettétek, hogy hiába indítják a vonatokat, buszokat, \ldots stb.\ járműveket $\tau$ időközönként, a megállóban gyanúsan sokat kell várni? Ha a járművek tényleg olyan gyakran közlekednének, mint mondják, akkor ha véletlenszerűen is érkeznénk ki az állomásra, $\tau/2$ időt kéne várnunk. De ugye ezt mindenki többnek érzi. Igaz volna Murphy törvénye, miszerint a járművek mindig akkor jönnek csak sokára, amikor mi éppen utazni szeretnénk velük?
+
+Modellezzük a járművek közlekedését az alábbiak szerint! A járműveket állandó, $\tau$ időközönként indítják, azonban a rájuk ható mindenféle bonyolult hatások miatt össze-vissza késnek, vagy éppen sietnek, sőt, akár meg is előzhetik egymást. Ez odáig fajul, hogy azok adott állomásba való beérkezése Poisson-folyamattal írható le, vagyis a járművek bármely időpillanatban egyforma valószínűséggel megérkezhetnek, és az egyik megérkezése nem befolyásolja a másik megérkezését.
+
+\begin{itemize}
+  \item Számítsuk ki, hogy mekkora időt kell átlagosan várni egy járműre!
+  \item Írjunk programot, ami modellezi a járműre való várakozási időt! Járjon 10, 100, \ldots stb.\ jármű egész nap és véletlenszerűen menjünk ki várakozni 1'000'000 alkalommal a nap folyamán a megállóba. Írja ki a program, hogy hányszorosa a várakozási idő a nem késő járművek esetéhez képest!
+\end{itemize}
+
+\section{Biztosra menő kártyajátékos}
+Az alábbi játékot játszunk egy 32 kártyás francia kártyával, amiben 16 fekete és 16 piros színű kártya van. Egy körben a kártyaosztó leemel a megkevert kártyapakliból 1 lapot, és meg kell tippelnem a színét. A tétet, amit felteszek a tippem helyességére, én választom meg minden körben. A tét megtétele után a kártyaosztó megmutatja a kártyát, majd kivonja a játékból. Ha eltaláltam a színét, akkor a tétem dupláját kapom meg. Ha vesztek, akkor a tétemet elbukom. A játékot addig játszuk, amíg az összes kártyát ki nem vonta az osztó a játékból, és a feladatom maximalizálni a pénzemet a játék végére a legszerencsétlenebb kártyasorrend esetére is. (Tehát nem a nyeremény várható értéke érdekel, hanem hogy mennyi az a pénz, amit legalább nyerhetek.)
+\begin{itemize}
+  \item Adj eljárást arra, hogyan számolnád ki a nyerő stratégiát egy tetszőleges helyzetben!
+  \item Programozd le a nyerő stratégiát, azaz ami kiszámolja, hogy adott helyzetben mi a nyerő tétösszeg az aktuális lépésnél, és hogy mennyi a minimálisan várható nyeremény!
+\end{itemize}
+
+
+\part{Megoldások}
+\section{Lépj bele a mezőbe!}
+Számláljuk le, hányféleképp dobhatunk ki 1-et, 2-t, \ldots $N$ értéket! Ehhez akár $N$ dobásra is szükségünk lehet, amelyből azonban csak némelyek lesznek jók.
+\begin{enumerate}
+  \item 1-et egy dobással tudunk csak elérni, és csak az 1 érték a jó a lehetséges 6 fajta kimenetből, így a valószínűsége 1/6.
+  \item 2-t dobhatunk 2 dobókockával, és akkor két darab 1-est kell dobni. Ennek a valószínűsége $1/6 \cdot 1/6 = 1/36$, avagy tehetjük egyetlen dobókockával, és akkor 2-est kell dobni, aminek az esélye 1/6. Ez utóbbira úgy is tekinthetünk, hogy két dobókockával dobunk, az elsőnek 2-esnek kell lennie, és a második értéke viszont bármilyen lehet, így az esély $6/36 = 1/6$ értékűnek adódik ismét. A lehetséges 36 kimenetből 7 eset jó nekünk. Vegyük észre, hogy az egyes valószínűségeket egyszerűen összeadhatjuk. A valószínűség tehát, hogy a 2-esbe belelépünk, 7/36.
+  \item Háromra az előzővel analóg módon adódik, hogy \[\underbrace {1 \cdot {{\left( {\frac{1}{6}} \right)}^3}}_{ \cdot | \cdot | \cdot } + \underbrace {2{{\left( {\frac{1}{6}} \right)}^2}}_{ \cdot | \cdot  \cdot \quad  \cdot  \cdot | \cdot } + \underbrace {1 \cdot \left( {\frac{1}{6}} \right)}_{ \cdot  \cdot  \cdot } = \frac{{49}}{{216}}.\] Vegyük észre a Pascal háromszöget, így gond nélkül felírhatjuk 6-ig a valószínűségeket.
+  \item Hétnél gondban vagyunk az előző formulával, mert nincs lehetőségünk 7-est dobni. A javaslatom az, hogy tartsuk meg a formulát, de vonjuk le azokat az eseteket, amiket szabálytalanul számolunk bele. Tehát a 7-et kidobhatjuk
+        \begin{enumerate}
+          \item 7db 1-esből 1 féle módon, vagy
+          \item 5db 1-es és 1db 2-esből 6 féle módon, vagy
+          \item 4db 1-es és 1db hármasból, vagy 4db 1-es és 2db kettesből, összesen 15 féle módon, \ldots stb.
+          \item 1db 1-esből és 1db 6-osból 6 féle módon, vagy
+          \item 1db 7-esből 1 féle módon
+        \end{enumerate}
+        Ezekből le kell vonni a legutóbbi esetet, mert 7-es dobókocka nincs. Ezt a levonogatós megoldást kiterjeszthetjük a 8-as, 9-es, stb.\ dobókockákra is. A gond akkor jelentkezik, amikor két tiltott dobókocka jelenik meg, pl. 2db 7-es. Oda kell arra figyelni, hogy ezeket csak 1x számoljuk hozzá a jókhoz (tévedésből), így le is kell vonnunk, de csak 1x. Elég, ha csak az egyik dobókocka tiltott, de ha kettő van, nem szabad kétszer levonni. Tehát hetenként képletet tudunk adni, illetve a kívánt szám 7-tel vett hányadosának alsóegészrész-függvénye szerint általános formulát is meg lehet adni.
+  \item Nagy $N$-re pedig a következőket tehetjük. Tekintsünk egy $m$ hosszúságú szakaszt a táblajátékban. A dobott számok átlaga $3.5$, így $m/3.5$ db mezőbe lépünk be egyenletes valószínűséggel (de egymástól nem függetlenül). Egy cellába való lépés valószínűsége pedig $m/3.5/m = 1/3.5$.
+\end{enumerate}
+\section{A MÁV és Murphy}
+Tekintsünk egy $n \cdot \tau $ hosszúságú időszakaszt, amely alatt feltesszük, hogy pontosan $n$ db jármű fog megérkezni, és ezen idő alatt mindegyik vonat megérkezési valószínűsége egyenletes eloszlású, és egymástól független. (Tehát Poisson folyamat.)
+
+Annak a valószínűsége, hogy egy kiszemelt vonat az $n$ vonat közül jön be a megállóba $\left[ {0;t} \right]$ között arányos $t$-nek a teljes időtartamra vett arányával. Ezt felírva, majd továbbgondolva kapjuk a következőket.
+\begin{align}
+  {P_{{\text{az egyik kiszemelt az }}n{\text{-ből jön}}}}\left( t \right)     & = t/\left( {n\tau } \right)                                                                        \\
+  {P_{{\text{az egyik kiszemelt az }}n{\text{-ből nem jön}}}}\left( t \right) & = 1 - {P_{{\text{az egyik az }}n{\text{-ből jőn}}}}\left( t \right) \nonumber                      \\
+                                                                              & = 1 - t/\left( {n\tau } \right)                                                                    \\
+  {P_{{\text{semelyik sem jön az }}n{\text{-ből}}}}\left( t \right)           & = {\left[ {{P_{{\text{az egyik az }}n{\text{-ből nem jön}}}}\left( t \right)} \right]^n} \nonumber \\
+                                                                              & = {\left[ {1 - t/\left( {n\tau } \right)} \right]^n}
+\end{align}
+Itt felhasználtuk, hogy egy esemény és ellentettjének valószínűsége 1, valamint hogy független események együttes bekövetkeztének valószínűsége az egyes valószínűségek szorzata. Elvégezhetjük az $n\to \infty$ határátmenetet, amelyben éppen megkapjuk az exponenciális függvényt,
+\begin{equation}
+  {P_{{\text{semelyik sem jön}}}}\left( t \right) = {e^{ - t/\tau }}.
+\end{equation}
+Ez tehát megadja, hogy mi a valószínűsége, hogy $t$ ideig egyetlen jármű sem jön. Ennek az ellentettje az, hogy legalább 1 jármű jön, azaz
+\begin{equation}  \label{eq:jon}
+  {P_{{\text{legalább 1 jön}}}}\left( t \right) = 1 - {e^{ - t/\tau }}.
+\end{equation}
+Ez egy kumulatív valószínűség, 0-ból indul, 1-hez tart nagy $t$-re. Mi a valószínűsége, hogy éppen $t$ időben jön jármű? Ez az a függvény, aminek az integráljaként \aref{eq:jon} előáll, tehát ezt az egyenletet deriválva megkapjuk a valószínűség-sűrűséget,
+\begin{equation}
+  {P_{{\text{pontosan ekkor jön}}}}\left( t \right) = \frac{1}{\tau }{e^{ - t/\tau }}.
+\end{equation}
+Ellenőrizhetjük, hogy ennek az integrálja az értelmezési tartományon, a $\left[ {0,\infty } \right)$ intervallumon 1. Ez tehát megadja, hogy mekkora a valószínűsége, hogy $t$-ben jön jármű. Mennyi $t$ várható értéke?
+\begin{equation}
+  \int\limits_0^\infty  {P\left( t \right)t} dt = \int\limits_0^\infty  {\frac{{{e^{ - t/\tau }}}}{\tau }t} dt = \left. { - \tau \left( {\frac{t}{\tau } + 1} \right){e^{ - t/\tau }}} \right|_0^\infty  = \tau
+\end{equation}
+Azt kaptuk tehát, hogy a várható várakozási idő éppen annyi, mint az átlagos követési időtávolság. Ez kétszer annyi idő, mintha a járművek egyenlő időközönként követnénk egymást, és mi véletlenszerűen mennénk ki várakozni.
+
+
+
+
+\end{document}

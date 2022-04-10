@@ -75,3 +75,11 @@ SO/so_notifier/last_questions.txt
 # compiled document
 **/docs/build/*
 **/docs/source/_build/*
+
+**/*latex*/**/*.log
+**/*latex*/**/*.fls
+**/*latex*/**/*.aux
+**/*latex*/**/*.fdb_latexmk
+**/*latex*/**/*.gz
+**/*latex*/**/*.toc
+**/*latex*/**/*.pdf
