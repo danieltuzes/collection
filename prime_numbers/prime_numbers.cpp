@@ -1,5 +1,5 @@
 // prime_numbers.cpp : This file contains the 'main' function. Program execution begins and ends there.
-// keresd meg növekvõ sorrendben a prímszámokat
+// keresd meg nÃ¶vekvÅ‘ sorrendben a prÃ­mszÃ¡mokat
 
 #include <iostream>
 #include <vector>
