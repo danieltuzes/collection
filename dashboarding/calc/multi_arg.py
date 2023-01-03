@@ -11,7 +11,7 @@ which is an array and can be arbitrary long.
 
 import string
 import math
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Dict
 import numpy as np
 
 Value = Union[float, int, np.ndarray]
@@ -75,7 +75,7 @@ def consume_frac(seq: str, pos: int) -> Tuple[float, int]:
 
 
 def consume_expr(seq: str,
-                 arr: dict[str, np.ndarray],
+                 arr: Dict[str, np.ndarray],
                  pos: int = 0,
                  until: str = "") -> Tuple[Value, int]:
     """Consume a single value starting from pos."""
