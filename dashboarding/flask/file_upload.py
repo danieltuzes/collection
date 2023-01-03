@@ -17,7 +17,7 @@ from time import sleep
 from datetime import datetime
 import hashlib
 import inspect
-from typing import Tuple
+from typing import Tuple, Dict
 import matplotlib.pyplot as plt
 import re
 import numpy
@@ -558,7 +558,7 @@ def as_html(fname: str) -> str:
     return md_repr
 
 
-def get_form_data() -> Tuple[dict[str, numpy.ndarray], str, str]:
+def get_form_data() -> Tuple[Dict[str, numpy.ndarray], str, str]:
     """Get data, expr and summary for the evaluate page."""
     summary = None
     try:
