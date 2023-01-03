@@ -120,7 +120,7 @@ def consume_expr(seq: str,
 
 
 def consume_value(seq: str,
-                  arr: dict[str, np.ndarray],
+                  arr: Dict[str, np.ndarray],
                   pos: int) -> Tuple[Value, int]:
     """Reads in a function or number values."""
     start = pos
