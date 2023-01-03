@@ -6,6 +6,6 @@ matplotlib
 jupyter
 jupyterlab
 gevent
-git
+markdown
 openpyxl
 voila
