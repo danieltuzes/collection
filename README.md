@@ -6,11 +6,10 @@ Többféle, egyenként apró programot vagy szkriptet gyűjtötem itt össze. N�
 
 Tartalomjegyzék
 
-- [collection](#collection)
-  - [bash szkriptek](#bash-szkriptek)
-  - [C++ programocskák](#c-programocskák)
-  - [python, modulok](#python-modulok)
-    - [py_interview](#py_interview)
+- [bash szkriptek](#bash-szkriptek)
+- [C++ programocskák](#c-programocskák)
+- [python, modulok](#python-modulok)
+  - [py_interview](#py_interview)
 
 ## bash szkriptek
 
@@ -47,6 +46,8 @@ Azt gondoltam, hogy sok c++ programocskát fogok írni, de inkább python kezdte
     - randomszám generátor
     - file feltöltő szerver és file listázó oldal
     - függvényábrázoló program
+- valszámos programozások
+  - theater_seat
 
 ### py_interview
 
