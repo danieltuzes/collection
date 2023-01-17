@@ -4,11 +4,12 @@ This is a Jupyter Voilà example how a minimalist web application looks like. Yo
 
 In my other flask example I have full control over the design, content and code, but it also means that I have to provide the glue between
 
-HTML request,
-python calculation and
-rendering the result
-return server response
-Here I only have to have a python environment with the proper python packages, wite the python code, and nothing else (wqeb query, webserver, HTML) needs to be taken care of.
+- HTML request,
+- python calculation and
+- rendering the result
+- return server response
+
+Here I only have to have a python environment with the proper python packages, write the python code, and nothing else (wqeb query, webserver, HTML) needs to be taken care of.
 
 ## Usage
 
