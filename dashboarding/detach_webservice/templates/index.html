@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Script</title>
+</head>
+<body>
+    <h1>Upload your Python script</h1>
+    <form action="/" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Upload">
+    </form>
+
+    <h2>Uploaded scripts</h2>
+    <table border="1">
+        <tr>
+            <th>Original Filename</th>
+            <th>Date of Upload</th>
+            <th>Status</th>
+            <th>stdout</th>
+            <th>stderr</th>
+        </tr>
+        {% for entry in entries %}
+            <tr>
+                <td>{{ entry[0] }}</td>
+                <td>{{ entry[1] }}</td>
+                <td>{{ entry[3] }}</td>
+                <td><a href="{{ url_for('download_file', folder='stdout', filename=entry[5].split('/')[-1]) }}">Download stdout</a></td>
+                <td><a href="{{ url_for('download_file', folder='stderr', filename=entry[6].split('/')[-1]) }}">Download stderr</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
