@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Service</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 bg-light">
+            <h5>Ping Results</h5>
+            <select id="server" class="form-control mb-2">
+                <option value="google.com">google.com</option>
+                <option value="metal.elte.hu">metal.elte.hu</option>
+            </select>
+            <button onclick="startPing()" class="btn btn-primary mb-2">Start</button>
+            <button onclick="stopPing()" class="btn btn-danger mb-2">Stop</button>
+            <button onclick="downloadLog()" class="btn btn-secondary mb-2">Download Log</button>
+            <div id="pingResult" style="overflow-y: scroll; height: 80vh;"></div>
+        </div>
+        <div class="col-md-9">
+            <canvas id="chart"></canvas>
+            <button onclick="downloadChart()" class="btn btn-secondary mt-2">Download Plot</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let pings = [];
+    let timestamps = [];
+    let interval;
+    let chart;
+
+    function startPing() {
+        if(interval) {
+            clearInterval(interval);
+        }
+        interval = setInterval(function(){
+            fetch('/ping', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    server: document.getElementById('server').value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('pingResult');
+                resultDiv.innerHTML = `Ping at ${data.timestamp}: ${data.time}ms<br>` + resultDiv.innerHTML;
+
+                pings.push(data.time);
+                timestamps.push(data.timestamp);
+
+                plotChart();
+            });
+        }, 1000);
+    }
+
+    function stopPing() {
+        clearInterval(interval);
+    }
+
+    function downloadLog() {
+        let ip = "{{ request.remote_addr }}";  // Flask will fill this in
+        let date = new Date().toISOString().slice(0,10);
+        window.location.href = `/download/${ip}_${date}.txt`;
+    }
+
+    function plotChart() {
+        if(chart) {
+            chart.destroy();
+        }
+        chart = new Chart(document.getElementById("chart"), {
+            type: 'line',
+            data: {
+                labels: timestamps,
+                datasets: [{
+                    data: pings,
+                    label: "Ping Time (ms)",
+                    borderColor: "#3e95cd",
+                    fill: false
+                }]
+            },
+            options: {
+                animation: {
+                    duration: 0
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    function downloadChart() {
+        var link = document.createElement('a');
+        link.download = 'chart.png';
+        link.href = chart.toBase64Image();
+        link.click();
+    }
+
+</script>
+
+</body>
+</html>
