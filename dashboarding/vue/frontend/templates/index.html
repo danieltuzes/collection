@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Processor</title>
+    <link href="{{ url_for('static', filename='bootstrap-5.2.3-dist/css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="my-4">Welcome to the CSV File Processor</h1>
+        <p>Please upload a CSV file:</p>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".csv">
+            <input type="submit" value="Upload">
+         </form>
+
+      {% if output_files %}
+      <h2 class="my-4">Generated output files:</h2>
+      <ul class="list-group">
+        {% for output_file in output_files %}
+        <li class="list-group-item{% if loop.first %} list-group-item-success{% endif %}">
+          <a href="{{ url_for('download_file', filename=output_file) }}">{{ output_file }}</a>
+          {% if loop.first %}<span class="badge bg-success">Latest</span>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+
+    <script src="{{ url_for('static', filename='bootstrap-5.2.3-dist/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vue.js') }}"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+
+</body>
+
+</html>
